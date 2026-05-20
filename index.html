@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Aconselhamento Celestial — Jesus Cristo</title>
+    <meta name="theme-color" content="#0d0a14">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="manifest" href="manifest.json">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Outfit:wght@300;400;500;600&family=Playfair+Display:ital,wght@1,500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --gold: #D4AF37; --gold-light: #FFE0B2; --gold-glow: rgba(212,175,55,0.3);
+            --bg-deep: #07050d; --panel: rgba(18,14,26,0.75);
+            --text: #f0eef8; --muted: #9895a8;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Outfit', sans-serif; }
+        
+        body {
+            background: radial-gradient(ellipse at 50% 0%, #1a1030 0%, #07050d 70%);
+            color: var(--text); min-height: 100vh; min-height: -webkit-fill-available;
+            display: flex; align-items: center; justify-content: center; overflow: hidden;
+        }
+        
+        .stars {
+            position: fixed; inset: 0; z-index: 0;
+            background-image:
+                radial-gradient(1px 1px at 15% 20%, rgba(255,255,255,0.7), transparent),
+                radial-gradient(1px 1px at 80% 10%, rgba(255,255,255,0.5), transparent),
+                radial-gradient(1.5px 1.5px at 30% 70%, rgba(255,255,255,0.6), transparent),
+                radial-gradient(1px 1px at 65% 50%, rgba(255,255,255,0.4), transparent),
+                radial-gradient(1px 1px at 90% 80%, rgba(255,255,255,0.5), transparent);
+            background-size: 300px 300px; opacity: 0.15; pointer-events: none;
+        }
+        
+        .app {
+            position: relative; z-index: 1; width: 100%; max-width: 480px;
+            height: 100vh; height: 100dvh; display: flex; flex-direction: column;
+            background: rgba(7,5,13,0.5);
+            border-left: 1px solid rgba(255,255,255,0.04);
+            border-right: 1px solid rgba(255,255,255,0.04);
+            box-shadow: 0 0 100px rgba(0,0,0,0.8);
+            transition: max-width 0.3s;
+        }
+        
+        header {
+            padding: 14px 20px; border-bottom: 1px solid rgba(212,175,55,0.18);
+            background: rgba(7,5,13,0.9); backdrop-filter: blur(20px);
+            display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
+        }
+        .brand h1 {
+            font-family: 'Cinzel', serif; font-size: 1.1rem; letter-spacing: 1.5px;
+            background: linear-gradient(135deg, var(--gold-light), var(--gold));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .brand span { font-size: 0.66rem; color: var(--muted); display: block; margin-top: 1px; }
+        .badge {
+            font-size: 0.6rem; color: var(--gold-light);
+            border: 1px solid rgba(212,175,55,0.35); padding: 3px 7px; border-radius: 6px;
+            text-transform: uppercase; font-weight: 600; letter-spacing: 0.4px;
+        }
+        
+        .avatar-section {
+            flex-shrink: 0; display: flex; flex-direction: column; align-items: center;
+            padding: 16px 0 10px;
+            background: linear-gradient(180deg, rgba(7,5,13,0.6) 0%, transparent 100%);
+            position: relative;
+        }
+        
+        .canvas-wrapper {
+            position: relative; width: 170px; height: 170px;
+            transition: width 0.3s, height 0.3s;
+        }
+        .halo-ring {
+            position: absolute; inset: -10px; border-radius: 50%;
+            border: 1px solid rgba(212,175,55,0.2); box-shadow: 0 0 20px rgba(212,175,55,0.1);
+            animation: haloSpin 18s linear infinite; pointer-events: none;
+            transition: inset 0.3s;
+        }
+        .halo-ring.speaking {
+            border-color: rgba(212,175,55,0.55);
+            box-shadow: 0 0 35px rgba(212,175,55,0.28);
+            animation: haloSpin 6s linear infinite;
+        }
+        @keyframes haloSpin { to { transform: rotate(360deg); } }
+        
+        #jesusCanvas {
+            width: 100%; height: 100%; border-radius: 50%; display: block;
+            box-shadow: 0 16px 40px rgba(0,0,0,0.85), 0 0 0 3px rgba(212,175,55,0.28);
+        }
+        
+        .status-indicator {
+            margin-top: 10px; display: flex; align-items: center; gap: 6px;
+            font-size: 0.72rem; color: var(--muted); opacity: 0; transition: opacity 0.4s;
+        }
+        .status-indicator.visible { opacity: 1; }
+        .status-dot {
+            width: 7px; height: 7px; border-radius: 50%; background: var(--gold);
+            animation: statusPulse 1.2s ease-in-out infinite;
+        }
+        @keyframes statusPulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.7)} }
+        
+        .wave-bars { display: flex; gap: 3px; align-items: flex-end; height: 18px; margin-top: 8px; opacity: 0.6; }
+        .wave-bar {
+            width: 3px; border-radius: 2px;
+            background: linear-gradient(to top, var(--gold), var(--gold-light)); height: 4px; transition: height 0.07s ease;
+        }
+        
+        .chat {
+            flex: 1; overflow-y: auto; padding: 14px 18px;
+            display: flex; flex-direction: column; gap: 14px; scroll-behavior: smooth;
+        }
+        .chat::-webkit-scrollbar { width: 3px; }
+        .chat::-webkit-scrollbar-thumb { background: rgba(212,175,55,0.2); border-radius: 2px; }
+        
+        .msg {
+            max-width: 88%; padding: 12px 15px; border-radius: 18px;
+            font-size: 0.9rem; line-height: 1.5;
+            animation: msgIn 0.32s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+        @keyframes msgIn { from{opacity:0;transform:translateY(10px) scale(0.97)} to{opacity:1;transform:translateY(0) scale(1)} }
+        .msg.user {
+            align-self: flex-end; background: rgba(212,175,55,0.12);
+            border: 1px solid rgba(212,175,55,0.2); color: #fff; border-bottom-right-radius: 4px;
+        }
+        .msg.jesus {
+            align-self: flex-start; background: var(--panel);
+            border: 1px solid rgba(255,255,255,0.07); backdrop-filter: blur(16px); border-bottom-left-radius: 4px;
+        }
+        .msg.jesus p { margin-bottom: 7px; }
+        .msg.jesus p:last-child { margin-bottom: 0; }
+        .verse-block {
+            margin: 10px 0; padding: 10px 13px; border-left: 3px solid var(--gold);
+            background: rgba(212,175,55,0.05); border-radius: 3px;
+            font-family: 'Playfair Display', serif; font-style: italic;
+            color: var(--gold-light); font-size: 0.88rem; line-height: 1.55;
+        }
+        
+        .skeleton-msg {
+            align-self: flex-start; width: 80%; padding: 16px;
+            background: var(--panel); border-radius: 18px 18px 18px 4px;
+            border: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; gap: 8px;
+        }
+        .skel-line {
+            height: 11px; border-radius: 6px;
+            background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.04) 75%);
+            background-size: 200% 100%; animation: shimmer 1.4s infinite;
+        }
+        
+        .welcome { margin: auto; text-align: center; padding: 20px; }
+        .welcome h2 {
+            font-family: 'Cinzel', serif; font-size: 1.35rem;
+            background: linear-gradient(135deg, var(--gold-light), var(--gold));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 8px;
+        }
+        .welcome p { font-size: 0.83rem; color: var(--muted); line-height: 1.55; }
+        
+        .pills {
+            display: flex; gap: 7px; overflow-x: auto; padding: 8px 18px; scrollbar-width: none;
+            flex-shrink: 0; background: linear-gradient(0deg, rgba(7,5,13,0.8) 0%, transparent 100%);
+        }
+        .pills::-webkit-scrollbar { display: none; }
+        .pill {
+            white-space: nowrap; background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08); color: var(--text);
+            padding: 7px 13px; border-radius: 20px; font-size: 0.76rem;
+            cursor: pointer; transition: all 0.2s;
+        }
+        .pill:hover { border-color: rgba(212,175,55,0.4); background: rgba(212,175,55,0.08); transform: translateY(-1.5px); }
+        
+        .input-area {
+            padding: 12px 16px 26px; background: rgba(7,5,13,0.95);
+            border-top: 1px solid rgba(212,175,55,0.18);
+            display: flex; gap: 10px; align-items: center; flex-shrink: 0; backdrop-filter: blur(24px);
+        }
+        .input-wrap { flex: 1; }
+        textarea#msg {
+            width: 100%; background: rgba(255,255,255,0.05);
+            border: 2px solid rgba(212,175,55,0.3); border-radius: 22px;
+            padding: 11px 16px; color: #fff; font-size: 0.9rem;
+            resize: none; outline: none; height: 46px; line-height: 1.35; transition: all 0.28s;
+        }
+        textarea#msg:focus { background: rgba(255,255,255,0.08); border-color: var(--gold); box-shadow: 0 0 14px var(--gold-glow); }
+        textarea#msg::placeholder { color: rgba(255,255,255,0.38); }
+        
+        .send-btn {
+            width: 46px; height: 46px; border-radius: 50%; border: none; flex-shrink: 0;
+            background: linear-gradient(135deg, var(--gold-light), var(--gold));
+            color: #0d0a14; cursor: pointer; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 14px rgba(212,175,55,0.35); transition: all 0.22s;
+        }
+        .send-btn:hover { transform: scale(1.06); box-shadow: 0 4px 20px rgba(212,175,55,0.55); }
+        .send-btn:disabled { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.25); box-shadow: none; cursor: not-allowed; transform: none; }
+        
+        .audio-panel {
+            position: absolute; top: 195px; left: 50%; transform: translateX(-50%);
+            background: rgba(7,5,13,0.95); border: 1px solid rgba(212,175,55,0.25);
+            border-radius: 18px; padding: 7px 14px; display: flex; align-items: center; gap: 10px;
+            z-index: 10; opacity: 0; pointer-events: none; transition: all 0.3s cubic-bezier(0.175,0.885,0.32,1.275);
+            backdrop-filter: blur(16px);
+        }
+        .audio-panel.active { opacity: 1; pointer-events: all; transform: translateX(-50%) translateY(4px); }
+        .panel-btn { background: none; border: none; color: var(--text); cursor: pointer; padding: 4px; border-radius: 50%; transition: all 0.18s; }
+        .panel-btn:hover { color: var(--gold); background: rgba(255,255,255,0.05); }
+        .panel-label { font-size: 0.7rem; color: var(--muted); }
+
+        /* RESPONSIVIDADE TOTAL (MOBILE-FIRST & ADAPTATIVO) */
+        @media (max-width: 480px) {
+            body { background: #07050d; }
+            .app { max-width: 100%; border: none; box-shadow: none; }
+            .canvas-wrapper { width: 135px; height: 135px; }
+            .halo-ring { inset: -8px; }
+            .audio-panel { top: 155px; padding: 5px 10px; }
+            header { padding: 10px 15px; }
+            .brand h1 { font-size: 1rem; }
+            .chat { padding: 10px 14px; }
+            .input-area { padding: 10px 12px 20px; }
+            .pill { padding: 5px 11px; font-size: 0.72rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="stars"></div>
+<div class="app" id="app">
+    <header>
+        <div class="brand">
+            <h1>Celestial</h1>
+            <span>Aconselhamento Bíblico com Jesus Cristo</span>
+        </div>
+        <div class="badge">v7.0</div>
+    </header>
+
+    <div class="avatar-section">
+        <div class="canvas-wrapper">
+            <div class="halo-ring" id="haloRing"></div>
+            <canvas id="jesusCanvas" width="360" height="360"></canvas>
+        </div>
+        <div class="status-indicator" id="statusIndicator">
+            <div class="status-dot"></div>
+            <span id="statusText">Jesus está falando...</span>
+        </div>
+        <div class="wave-bars" id="waveBarsContainer">
+            <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+            <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+        </div>
+        <div class="audio-panel" id="audioPanel">
+            <button class="panel-btn" id="playPauseBtn">
+                <svg id="ppIcon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+                </svg>
+            </button>
+            <span class="panel-label" id="panelLabel">Ouvindo...</span>
+        </div>
+    </div>
+
+    <div class="chat" id="chat">
+        <div class="welcome" id="welcome">
+            <h2>Bem-vindo, meu filho</h2>
+            <p>Compartilhe o que pesa em seu coração. Eu trarei duas passagens bíblicas para confortar sua dor.</p>
+        </div>
+    </div>
+
+    <div class="pills">
+        <div class="pill" onclick="suggest('Me sinto cansado e ansioso com os problemas do futuro')">Ansiedade e medo</div>
+        <div class="pill" onclick="suggest('Como perdoar alguém que me machucou muito')">Força para perdoar</div>
+        <div class="pill" onclick="suggest('Não sei como pagar minhas contas, estou preocupado com dinheiro')">Dificuldade financeira</div>
+        <div class="pill" onclick="suggest('Estou passando pela dor do luto e pela saudade de quem partiu')">Conforto no luto</div>
+        <div class="pill" onclick="suggest('Me sinto completamente sozinho e sem rumo na vida')">Solidão</div>
+    </div>
+
+    <div class="input-area">
+        <div class="input-wrap">
+            <textarea id="msg" placeholder="Abra seu coração para Jesus..." rows="1" oninput="adjustHeight(this)"></textarea>
+        </div>
+        <button class="send-btn" id="sendBtn" onclick="send()" disabled>
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="22" y1="2" x2="11" y2="13"></line>
+                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+            </svg>
+        </button>
+    </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+//  CANVAS 2D TALKING-HEAD ENGINE v7.0 (PREMIUM)
+//  - Novo Retrato Olive Semítico Realista
+//  - Algoritmo Flex-Lip sutil (Máx 4.5px, dentes superiores como traço fino, sem dente inferior)
+//  - Piscada de olhos restrita perfeitamente à órbita ocular
+//  - Parallax 3D multicamadas aprimorado
+// ═══════════════════════════════════════════════
+const canvas = document.getElementById('jesusCanvas');
+const ctx = canvas.getContext('2d');
+const W = 360, H = 360;
+
+const img = new Image();
+let imageReady = false;
+
+img.onload = () => { imageReady = true; };
+img.crossOrigin = 'anonymous';
+img.src = 'jesus_portrait.png?v=11';
+
+// Canvas Offscreen para renderizar a cabeça processada
+const offscreen = document.createElement('canvas');
+offscreen.width = W; offscreen.height = H;
+const octx = offscreen.getContext('2d');
+
+// Canvas temporário para processar o lábio flexível e mesclá-lo de forma limpa
+const lipTemp = document.createElement('canvas');
+lipTemp.width = W; lipTemp.height = H;
+const ltctx = lipTemp.getContext('2d');
+
+// Mapeamento facial do retrato (precisão milimétrica de órbita e lábio)
+const FL = {
+    mouthY: 0.535,   // Linha exata da divisão labial no novo retrato
+    mouthX: 0.500,
+    mouthW: 0.082,   // Largura da boca
+    eyeLX: 0.408, eyeLY: 0.362,
+    eyeRX: 0.584, eyeRY: 0.362,
+    eyeW: 0.033,     // Ajustado para ficar perfeitamente restrito ao globo ocular
+    eyeH: 0.008      // Altura da órbita para evitar vazamentos na pele
+};
+
+let t = 0;
+let speaking = false;
+let mouthOpen = 0;
+let jawOffset = 0;
+let blinkAcc = 0;
+let nextBlink = randBlink();
+const blinkDur = 160;
+
+function randBlink() { return 2500 + Math.random() * 4000; }
+
+// ─── RENDER LOOP ───────────────────────────────
+function loop() {
+    requestAnimationFrame(loop);
+    if (!imageReady) return;
+
+    t += 16.7;
+    const ts = t / 1000;
+
+    // Ombros e fundo sways lentos
+    const bodyBreathe = Math.sin(ts * 0.40) * 1.2;
+    const bodySwayX   = Math.sin(ts * 0.25) * 0.8;
+    const bodySwayY   = Math.sin(ts * 0.30) * 0.6;
+
+    // Cabeça (Parallax maior)
+    const headBreathe = Math.sin(ts * 0.50) * 2.5;
+    const headSwayX   = Math.sin(ts * 0.35) * 2.2 + (speaking ? Math.sin(ts * 2.1) * 0.8 : 0);
+    const headSwayY   = Math.sin(ts * 0.42) * 1.3 + (speaking ? Math.sin(ts * 2.6) * 0.3 : 0);
+    const headTilt    = Math.sin(ts * 0.28) * 0.008 + (speaking ? Math.sin(ts * 1.7) * 0.003 : 0);
+
+    // Sincronia de Maxilar (Abertura de boca sutil, calma e controlada: Max 4.5px)
+    const targetJaw = mouthOpen * 4.5;
+    jawOffset += (targetJaw - jawOffset) * 0.24;
+
+    // Piscar de olhos (Blink)
+    blinkAcc += 16.7;
+    let blinkScale = 0;
+    if (blinkAcc > nextBlink) {
+        const elapsed = blinkAcc - nextBlink;
+        if (elapsed < blinkDur) {
+            blinkScale = Math.sin((elapsed / blinkDur) * Math.PI);
+        } else {
+            blinkAcc = 0;
+            nextBlink = randBlink();
+        }
+    }
+
+    // ── DESENHO NO CANVAS PRINCIPAL ──
+    ctx.clearRect(0, 0, W, H);
+    
+    // Recorte circular do avatar
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(W/2, H/2, W/2, 0, Math.PI * 2);
+    ctx.clip();
+
+    // 1. OMBROS / FUNDO (Camada base estática em relação à fala)
+    ctx.save();
+    ctx.translate(W/2 + bodySwayX, H/2 + bodySwayY + bodyBreathe);
+    ctx.scale(1.02, 1.02);
+    ctx.translate(-W/2, -H/2);
+    ctx.drawImage(img, 0, 0, img.naturalWidth, img.naturalHeight, 0, 0, W, H);
+    ctx.restore();
+
+    // 2. CABEÇA E PROCESSAMENTO DO ROSTO
+    octx.clearRect(0, 0, W, H);
+    octx.save();
+    
+    // Rotação e translação total da cabeça
+    octx.translate(W/2 + headSwayX, H/2 + headSwayY + headBreathe);
+    octx.rotate(headTilt);
+    octx.translate(-W/2, -H/2);
+
+    const sw = img.naturalWidth;
+    const sh = img.naturalHeight;
+    const mouthSY = FL.mouthY * sh;
+    const mouthDY = FL.mouthY * H;
+
+    // Passo 2A: Desenhar o rosto estático base completo
+    octx.drawImage(img, 0, 0, sw, sh, 0, 0, W, H);
+
+    // Passo 2B: Se a boca estiver abrindo, desenhar a cavidade com dentes e língua
+    if (jawOffset > 0.3) {
+        const mx = FL.mouthX * W;
+        const my = mouthDY + jawOffset * 0.40;
+        const mw = FL.mouthW * W;
+        const mh = Math.max(jawOffset * 0.48, 1.0);
+
+        // 1. Fundo da Cavidade Oral (Garganta Escura Vermelho-Escura)
+        const mg = octx.createRadialGradient(mx, my, 0, mx, my + mh * 0.2, mw * 1.0);
+        mg.addColorStop(0,   'rgba(24, 6, 5, 0.98)');
+        mg.addColorStop(0.5, 'rgba(45, 12, 10, 0.95)');
+        mg.addColorStop(1,   'rgba(80, 30, 20, 0.0)');
+
+        octx.beginPath();
+        octx.ellipse(mx, my, mw, mh, 0, 0, Math.PI * 2);
+        octx.fillStyle = mg;
+        octx.fill();
+
+        // 2. Língua (Discreta, muito escura e sutil no fundo)
+        octx.save();
+        octx.fillStyle = 'rgba(100, 35, 30, 0.5)';
+        octx.beginPath();
+        octx.ellipse(mx, my + mh * 0.3, mw * 0.5, mh * 0.3, 0, 0, Math.PI * 2);
+        octx.fill();
+        octx.restore();
+
+        // 3. Dentes Superiores (Apenas uma linha finíssima de 0.7px de altura, sem blocos brancos)
+        octx.save();
+        octx.fillStyle = 'rgba(235, 232, 224, 0.85)';
+        octx.beginPath();
+        octx.ellipse(mx, mouthDY + 0.8, mw * 0.70, 0.7, 0, 0, Math.PI * 2);
+        octx.fill();
+        octx.restore();
+    }
+
+    // Passo 2C: ALGORITMO FLEX-LIP (Distorção 1D labial ultra-limpa)
+    if (jawOffset > 0.1) {
+        const sliceH = 36;
+        const padW = 1.6;
+        
+        const dx = (FL.mouthX - FL.mouthW * padW) * W;
+        const dy = mouthDY + jawOffset;
+        const dw = FL.mouthW * padW * 2 * W;
+        const dh = sliceH - jawOffset;
+
+        const sx = (FL.mouthX - FL.mouthW * padW) * sw;
+        const sy = mouthSY;
+        const sW_slice = FL.mouthW * padW * 2 * sw;
+        const sH_slice = sliceH * (sh / H);
+
+        ltctx.clearRect(0, 0, W, H);
+        ltctx.drawImage(img,
+            sx, sy, sW_slice, sH_slice,
+            dx, dy, dw, dh
+        );
+
+        ltctx.save();
+        ltctx.globalCompositeOperation = 'destination-in';
+        const lg = ltctx.createLinearGradient(dx, 0, dx + dw, 0);
+        lg.addColorStop(0, 'rgba(0,0,0,0)');
+        lg.addColorStop(0.20, 'rgba(0,0,0,1)');
+        lg.addColorStop(0.80, 'rgba(0,0,0,1)');
+        lg.addColorStop(1, 'rgba(0,0,0,0)');
+        ltctx.fillStyle = lg;
+        ltctx.fillRect(dx, 0, dw, H);
+        ltctx.restore();
+
+        octx.drawImage(lipTemp, 0, 0);
+    }
+
+    // Passo 2D: Piscar de Olhos (Eyelid Slide restrito perfeitamente à órbita ocular)
+    if (blinkScale > 0.02) {
+        const ew = FL.eyeW * W;
+        const eh = FL.eyeH * H;
+
+        [[FL.eyeLX, FL.eyeLY], [FL.eyeRX, FL.eyeRY]].forEach(([ex, ey]) => {
+            octx.save();
+            const cy = ey * H - eh * (1 - blinkScale);
+            octx.translate(ex * W, cy);
+            octx.beginPath();
+            octx.ellipse(0, 0, ew, eh * blinkScale, 0, 0, Math.PI * 2);
+            
+            const eg = octx.createLinearGradient(0, -eh * blinkScale, 0, eh * blinkScale);
+            eg.addColorStop(0,   'rgba(65, 45, 30, 0.98)');
+            eg.addColorStop(0.6, 'rgba(110, 80, 58, 0.95)');
+            eg.addColorStop(1,   'rgba(142, 110, 83, 0.0)');
+            octx.fillStyle = eg;
+            octx.fill();
+            octx.restore();
+        });
+    }
+
+    octx.restore();
+
+    // Passo 2E: Máscara radial de suavização do avatar
+    octx.save();
+    octx.globalCompositeOperation = 'destination-in';
+    const mask = octx.createRadialGradient(
+        W/2, H/2 - 25, 40,
+        W/2, H/2 - 25, 132
+    );
+    mask.addColorStop(0, 'rgba(0,0,0,1)');
+    mask.addColorStop(0.85, 'rgba(0,0,0,1)');
+    mask.addColorStop(1, 'rgba(0,0,0,0)');
+    octx.fillStyle = mask;
+    octx.fillRect(0, 0, W, H);
+    octx.restore();
+
+    ctx.drawImage(offscreen, 0, 0);
+
+    ctx.restore();
+}
+
+requestAnimationFrame(loop);
+
+// ═══════════════════════════════════════════════
+//  AUDIO & WEB AUDIO API
+// ═══════════════════════════════════════════════
+let currentAudio = null;
+let audioCtx = null;
+let analyser = null;
+let dataArray = null;
+let audSrc = null;
+let animId = null;
+
+const haloRing = document.getElementById('haloRing');
+const statusEl = document.getElementById('statusIndicator');
+const audioPanel = document.getElementById('audioPanel');
+const ppIcon = document.getElementById('ppIcon');
+const panelLabel = document.getElementById('panelLabel');
+const waveBars = document.querySelectorAll('.wave-bar');
+
+function setSpeaking(val) {
+    speaking = val;
+    haloRing.classList.toggle('speaking', val);
+    statusEl.classList.toggle('visible', val);
+    if (!val) {
+        mouthOpen = 0;
+        waveBars.forEach(b => b.style.height = '4px');
+    }
+}
+
+function playAudio(base64) {
+    if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+    if (animId) cancelAnimationFrame(animId);
+
+    const audio = new Audio('data:audio/mp3;base64,' + base64);
+    currentAudio = audio;
+
+    if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        analyser = audioCtx.createAnalyser();
+        analyser.fftSize = 64;
+        dataArray = new Uint8Array(analyser.frequencyBinCount);
+    }
+
+    try {
+        if (audSrc) audSrc.disconnect();
+        audSrc = audioCtx.createMediaElementSource(audio);
+        audSrc.connect(analyser);
+        analyser.connect(audioCtx.destination);
+    } catch(e) {}
+
+    audioPanel.classList.add('active');
+    ppIcon.innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
+    panelLabel.textContent = 'Jesus está falando...';
+
+    audio.play().catch(() => {
+        panelLabel.textContent = 'Toque para ouvir';
+        ppIcon.innerHTML = '<path d="M8 5v14l11-7z"/>';
+    });
+
+    audio.onplay = () => {
+        setSpeaking(true);
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        analyzeLoop();
+    };
+    audio.onended = () => {
+        setSpeaking(false);
+        audioPanel.classList.remove('active');
+        if (animId) cancelAnimationFrame(animId);
+    };
+    audio.onpause = () => setSpeaking(false);
+
+    function analyzeLoop() {
+        if (!currentAudio || currentAudio.paused || currentAudio.ended) return;
+        analyser.getByteFrequencyData(dataArray);
+        let sum = 0;
+        for (let i = 1; i < dataArray.length - 1; i++) sum += dataArray[i];
+        const avg = sum / (dataArray.length - 2);
+        mouthOpen = Math.min(avg / 95, 1);
+        waveBars.forEach((bar, i) => {
+            bar.style.height = Math.min(4 + avg * ((i % 2) ? 1.3 : 0.8) / 5, 18) + 'px';
+        });
+        animId = requestAnimationFrame(analyzeLoop);
+    }
+}
+
+document.getElementById('playPauseBtn').addEventListener('click', () => {
+    if (!currentAudio) return;
+    if (currentAudio.paused) {
+        currentAudio.play();
+        ppIcon.innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
+        panelLabel.textContent = 'Jesus está falando...';
+    } else {
+        currentAudio.pause();
+        ppIcon.innerHTML = '<path d="M8 5v14l11-7z"/>';
+        panelLabel.textContent = 'Pausado';
+    }
+});
+
+// ═══════════════════════════════════════════════
+//  CHAT UI & SUBMISSION
+// ═══════════════════════════════════════════════
+const chat = document.getElementById('chat');
+const msgInput = document.getElementById('msg');
+const sendBtn = document.getElementById('sendBtn');
+
+msgInput.addEventListener('input', () => { sendBtn.disabled = !msgInput.value.trim(); });
+
+function adjustHeight(el) {
+    el.style.height = 'auto';
+    el.style.height = Math.min(el.scrollHeight, 100) + 'px';
+}
+
+function suggest(text) {
+    msgInput.value = text;
+    adjustHeight(msgInput);
+    sendBtn.disabled = false;
+    send();
+}
+
+function formatResponse(raw) {
+    let t = raw.replace(/\*\*(.*?)\*\*/g, '$1').replace(/\*/g, '');
+    const paras = t.split('\n').filter(p => p.trim());
+    let html = '';
+    paras.forEach(p => {
+        if (/([1-3]\s+)?[A-ZÁÉÍÓÚÂÊÔÃÕÀ][a-záéíóúâêôãõ]+\s+\d+:\d+/.test(p)) {
+            html += '<div class="verse-block">' + p + '</div>';
+        } else {
+            html += '<p>' + p + '</p>';
+        }
+    });
+    return html;
+}
+
+async function send() {
+    const text = msgInput.value.trim();
+    if (!text) return;
+
+    const welcomeEl = document.getElementById('welcome');
+    if (welcomeEl) welcomeEl.remove();
+
+    const userBubble = document.createElement('div');
+    userBubble.className = 'msg user';
+    userBubble.textContent = text;
+    chat.appendChild(userBubble);
+    msgInput.value = '';
+    adjustHeight(msgInput);
+    sendBtn.disabled = true;
+    chat.scrollTop = chat.scrollHeight;
+
+    const skel = document.createElement('div');
+    skel.className = 'skeleton-msg';
+    skel.innerHTML = '<div class="skel-line" style="width:90%"></div><div class="skel-line" style="width:78%"></div><div class="skel-line" style="width:84%"></div><div class="skel-line" style="width:70%"></div>';
+    chat.appendChild(skel);
+    chat.scrollTop = chat.scrollHeight;
+
+    try {
+        const res = await fetch('/api/counsel', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: text })
+        });
+        const data = await res.json();
+        skel.remove();
+
+        const bubble = document.createElement('div');
+        bubble.className = 'msg jesus';
+        bubble.innerHTML = data.error
+            ? '<p style="color:#ff8a8a">' + data.error + '</p>'
+            : formatResponse(data.counsel);
+        chat.appendChild(bubble);
+
+        if (data.audio) playAudio(data.audio);
+        chat.scrollTop = chat.scrollHeight;
+    } catch(e) {
+        skel.remove();
+        const errDiv = document.createElement('div');
+        errDiv.className = 'msg jesus';
+        errDiv.innerHTML = '<p style="color:#ff8a8a">Erro de conexão. Verifique o servidor local.</p>';
+        chat.appendChild(errDiv);
+    }
+}
+
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js?v=11').catch(() => {});
+}
+</script>
+</body>
+</html>

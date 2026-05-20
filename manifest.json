@@ -1,0 +1,17 @@
+{
+  "name": "Conselheiro Celestial",
+  "short_name": "Conselheiro",
+  "description": "Aconselhamento e Sabedoria Bíblica com Inteligência Artificial",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#08090e",
+  "theme_color": "#08090e",
+  "icons": [
+    {
+      "src": "jesus_portrait.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
