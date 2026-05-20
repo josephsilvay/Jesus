@@ -218,6 +218,103 @@
             .input-area { padding: 10px 12px 20px; }
             .pill { padding: 5px 11px; font-size: 0.72rem; }
         }
+
+        /* ── PWA SHARE AND INSTALLATION STYLES ── */
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .header-btn {
+            background: rgba(212,175,55,0.08);
+            border: 1px solid rgba(212,175,55,0.3);
+            color: var(--gold-light);
+            padding: 5px 9px;
+            border-radius: 8px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.2s ease;
+        }
+        .header-btn:hover {
+            background: rgba(212,175,55,0.18);
+            border-color: rgba(212,175,55,0.6);
+            box-shadow: 0 0 10px rgba(212,175,55,0.15);
+        }
+        .header-btn svg {
+            width: 13px;
+            height: 13px;
+            fill: currentColor;
+        }
+        .pwa-prompt {
+            position: absolute;
+            bottom: 95px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: linear-gradient(135deg, rgba(20, 16, 32, 0.96), rgba(8, 6, 14, 0.96));
+            border: 1px solid rgba(212,175,55,0.45);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 15px rgba(212,175,55,0.1);
+            border-radius: 20px;
+            padding: 10px 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 100;
+            width: calc(100% - 40px);
+            max-width: 320px;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .pwa-prompt.visible {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateX(-50%) translateY(0);
+        }
+        .pwa-text {
+            font-size: 0.72rem;
+            color: #e0dcf0;
+            flex: 1;
+            line-height: 1.35;
+            font-weight: 500;
+        }
+        .pwa-text strong {
+            color: var(--gold-light);
+        }
+        .pwa-btn {
+            background: linear-gradient(135deg, var(--gold-light), var(--gold));
+            color: #08060e;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(212,175,55,0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+            white-space: nowrap;
+        }
+        .pwa-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(212,175,55,0.5);
+        }
+        .pwa-close {
+            background: none;
+            border: none;
+            color: var(--muted);
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2px;
+        }
+        .pwa-close:hover {
+            color: #ffffff;
+        }
     </style>
 </head>
 <body>
@@ -228,7 +325,15 @@
             <h1>Celestial</h1>
             <span>Aconselhamento Bíblico com Jesus Cristo</span>
         </div>
-        <div class="badge">v7.0</div>
+        <div class="header-actions">
+            <button class="header-btn" onclick="shareWhatsApp()" title="Compartilhar no WhatsApp">
+                <svg viewBox="0 0 24 24">
+                    <path d="M12.012 2c-5.506 0-9.989 4.478-9.99 9.984a9.96 9.96 0 0 0 1.333 4.982L2 22l5.233-1.371a9.92 9.92 0 0 0 4.779 1.226h.005c5.505 0 9.99-4.478 9.99-9.985C22.007 6.476 17.519 2 12.012 2zm0 18.29h-.004a8.25 8.25 0 0 1-4.205-1.148l-.302-.18-3.125.82.834-3.047-.196-.312a8.27 8.27 0 0 1-1.267-4.436c.002-4.562 3.714-8.273 8.278-8.273 2.209.001 4.286.861 5.848 2.424a8.216 8.216 0 0 1 2.425 5.856c-.004 4.563-3.714 8.276-8.286 8.276zm4.537-6.19c-.248-.124-1.47-.724-1.696-.807-.228-.083-.393-.124-.559.124-.166.248-.641.807-.786.973-.145.166-.29.185-.538.062a7.65 7.65 0 0 1-3.238-1.999 8.44 8.44 0 0 1-1.884-2.348c-.146-.248-.015-.383.11-.507.112-.111.248-.29.372-.434.124-.145.165-.248.248-.414.083-.166.042-.31-.02-.434-.063-.124-.559-1.347-.766-1.844-.203-.488-.41-.42-.559-.427l-.476-.008c-.166 0-.435.062-.663.31-.228.248-.87.849-.87 2.071 0 1.221.89 2.401.99 2.546.1.145 1.751 2.673 4.242 3.746.592.255 1.055.408 1.417.523.596.19 1.138.163 1.567.099.479-.072 1.47-.601 1.677-1.18.207-.579.207-1.076.145-1.18-.061-.105-.227-.166-.475-.29z"/>
+                </svg>
+                Compartilhar
+            </button>
+            <div class="badge">v7.0</div>
+        </div>
     </header>
 
     <div class="avatar-section">
@@ -268,6 +373,12 @@
         <div class="pill" onclick="suggest('Não sei como pagar minhas contas, estou preocupado com dinheiro')">Dificuldade financeira</div>
         <div class="pill" onclick="suggest('Estou passando pela dor do luto e pela saudade de quem partiu')">Conforto no luto</div>
         <div class="pill" onclick="suggest('Me sinto completamente sozinho e sem rumo na vida')">Solidão</div>
+    </div>
+
+    <div class="pwa-prompt" id="pwaPrompt">
+        <span class="pwa-text" id="pwaText">Adicione à sua tela inicial para usar como um app de aconselhamento.</span>
+        <button class="pwa-btn" id="pwaBtn">Adicionar</button>
+        <button class="pwa-close" onclick="closePwaPrompt()" aria-label="Fechar">✕</button>
     </div>
 
     <div class="input-area">
@@ -696,6 +807,64 @@ async function send() {
         errDiv.innerHTML = '<p style="color:#ff8a8a">Erro de conexão. Verifique o servidor local.</p>';
         chat.appendChild(errDiv);
     }
+}
+
+// ═══════════════════════════════════════════════
+//  COMPARTILHAR NO WHATSAPP
+// ═══════════════════════════════════════════════
+function shareWhatsApp() {
+    const text = "Olá! Gostaria de compartilhar com você este aplicativo de aconselhamento bíblico que me trouxe muita paz. Você pode conversar com Jesus e ouvir Suas respostas em áudio com uma voz extremamente calma e sábia. Acesse o link e adicione à tela inicial do seu celular para usar como um app: " + window.location.href;
+    const url = "https://api.whatsapp.com/send?text=" + encodeURIComponent(text);
+    window.open(url, '_blank');
+}
+
+// ═══════════════════════════════════════════════
+//  PROMPT DE INSTALAÇÃO PWA
+// ═══════════════════════════════════════════════
+let deferredPrompt = null;
+const pwaPrompt = document.getElementById('pwaPrompt');
+const pwaBtn = document.getElementById('pwaBtn');
+const pwaText = document.getElementById('pwaText');
+
+// Detecta se já está rodando como standalone (PWA instalado)
+const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+
+// Detecta se é iOS (iPhone/iPad)
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
+if (!isStandalone) {
+    if (isIOS) {
+        // Exibe o banner instrutivo do iOS após 4 segundos
+        setTimeout(() => {
+            pwaText.innerHTML = 'Toque no ícone de compartilhar <svg width="14" height="14" style="display:inline-block;vertical-align:middle;margin:0 2px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg> e selecione <strong>Adicionar à Tela de Início</strong>.';
+            if (pwaBtn) pwaBtn.style.display = 'none';
+            pwaPrompt.classList.add('visible');
+        }, 4000);
+    } else {
+        // Para Android e outros navegadores com suporte a install prompt
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            // Exibe o banner de instalação após 2.5 segundos
+            setTimeout(() => {
+                pwaPrompt.classList.add('visible');
+            }, 2500);
+        });
+
+        if (pwaBtn) {
+            pwaBtn.addEventListener('click', async () => {
+                if (!deferredPrompt) return;
+                pwaPrompt.classList.remove('visible');
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                deferredPrompt = null;
+            });
+        }
+    }
+}
+
+function closePwaPrompt() {
+    pwaPrompt.classList.remove('visible');
 }
 
 if ('serviceWorker' in navigator) {
