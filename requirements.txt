@@ -3,3 +3,7 @@ google-generativeai
 python-dotenv
 Pillow
 edge-tts
+feedparser
+google-api-python-client
+google-auth-oauthlib
+google-auth
