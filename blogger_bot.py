@@ -22,15 +22,54 @@ def get_blogger_service():
     """Autentica o usuario e retorna o serviço da API do Blogger apontado pelo OAuth."""
     creds = None
     if os.path.exists('token.json'):
-        creds = Credentials.from_authorized_user_file('token.json', SCOPES)
+        try:
+            creds = Credentials.from_authorized_user_file('token.json', SCOPES)
+        except Exception as e:
+            print(f"❌ Erro ao ler token.json: {e}")
+            print("Verifique se o segredo TOKEN_JSON no GitHub Actions contém um JSON válido.")
+            raise
+    else:
+        print("⚠️ token.json não encontrado.")
+
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
+            print("🔄 O token expirou. Tentando renovar com o refresh_token...")
+            try:
+                creds.refresh(Request())
+                print("✅ Token renovado com sucesso!")
+                with open('token.json', 'w') as token:
+                    token.write(creds.to_json())
+            except Exception as e:
+                print(f"❌ Erro ao renovar o token: {e}")
+                print("Isso geralmente acontece porque o refresh token expirou ou foi revogado.")
+                print("Se você configurou seu consentimento OAuth como 'Em Teste' (Testing) no Google Console, o refresh token expira em 7 dias.")
+                print("Solução: Rode o script localmente para gerar um novo token.json e atualize o segredo TOKEN_JSON no GitHub.")
+                raise
         else:
-            flow = InstalledAppFlow.from_client_secrets_file('client_secret.json', SCOPES)
+            print("⚠️ Token inexistente/inválido e sem refresh_token válido.")
+            if not os.path.exists('client_secret.json'):
+                print("❌ Erro: client_secret.json não encontrado.")
+                print("Verifique se o segredo CLIENT_SECRET_JSON no GitHub está configurado.")
+                raise FileNotFoundError("client_secret.json não encontrado")
+            try:
+                flow = InstalledAppFlow.from_client_secrets_file('client_secret.json', SCOPES)
+            except Exception as e:
+                print(f"❌ Erro ao carregar client_secret.json: {e}")
+                print("Verifique se o segredo CLIENT_SECRET_JSON no GitHub é um JSON válido.")
+                raise
+            
+            if os.getenv('GITHUB_ACTIONS') == 'true':
+                print("❌ Erro: É necessária autenticação interativa, mas o script está rodando em ambiente headless (GitHub Actions).")
+                print("Não é possível abrir o navegador para login.")
+                print("Solução: Execute o bot localmente (onde abrirá o navegador para login), "
+                      "e depois copie o conteúdo do arquivo 'token.json' gerado para o segredo TOKEN_JSON do GitHub.")
+                raise PermissionError("Autenticação interativa necessária no GitHub Actions.")
+                
+            print("🔑 Abrindo navegador para autenticação...")
             creds = flow.run_local_server(port=0)
-        with open('token.json', 'w') as token:
-            token.write(creds.to_json())
+            with open('token.json', 'w') as token:
+                token.write(creds.to_json())
+                
     return build('blogger', 'v3', credentials=creds)
 
 def get_blog_id(service):
@@ -162,6 +201,15 @@ def get_pexels_image(keyword):
     return ""
 
 def main():
+    if not GEMINI_API_KEY:
+        print("❌ Erro: GEMINI_API_KEY não está configurada no ambiente ou no arquivo .env!")
+        print("Verifique se o segredo ENV_FILE no GitHub contém GEMINI_API_KEY.")
+        raise ValueError("GEMINI_API_KEY não encontrada")
+    if not PEXELS_API_KEY:
+        print("❌ Erro: PEXELS_API_KEY não está configurada no ambiente ou no arquivo .env!")
+        print("Verifique se o segredo ENV_FILE no GitHub contém PEXELS_API_KEY.")
+        raise ValueError("PEXELS_API_KEY não encontrada")
+
     service = get_blogger_service()
     blog_id = get_blog_id(service)
     
