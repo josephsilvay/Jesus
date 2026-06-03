@@ -1,0 +1,37 @@
+name: Blogger Ganhar Dinheiro - Hourly Bot
+
+on:
+  schedule:
+    - cron: '15 * * * *'  # :15 de cada hora
+  workflow_dispatch:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  run-bot-gd:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+        cache: 'pip'
+
+    - name: Install dependencies
+      run: pip install -r requirements.txt
+
+    - name: Recreate config and credentials files
+      env:
+        ENV_FILE_CONTENT: ${{ secrets.ENV_FILE }}
+        CLIENT_SECRET_CONTENT: ${{ secrets.CLIENT_SECRET_JSON }}
+        TOKEN_CONTENT: ${{ secrets.TOKEN_JSON }}
+      run: |
+        printf '%s' "$ENV_FILE_CONTENT" > .env
+        printf '%s' "$CLIENT_SECRET_CONTENT" > client_secret.json
+        printf '%s' "$TOKEN_CONTENT" > token.json
+        python -c "import json; json.load(open('token.json')); print('token.json OK')"
+
+    - name: Run Ganhar Dinheiro Bot
+      run: python blogger_bot_gd.py
