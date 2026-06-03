@@ -25,10 +25,16 @@ jobs:
         pip install -r requirements.txt
 
     - name: Recreate config and credentials files
+      env:
+        ENV_FILE_CONTENT: ${{ secrets.ENV_FILE }}
+        CLIENT_SECRET_CONTENT: ${{ secrets.CLIENT_SECRET_JSON }}
+        TOKEN_CONTENT: ${{ secrets.TOKEN_JSON }}
       run: |
-        echo "${{ secrets.ENV_FILE }}" > .env
-        echo "${{ secrets.CLIENT_SECRET_JSON }}" > client_secret.json
-        echo "${{ secrets.TOKEN_JSON }}" > token.json
+        printf '%s' "$ENV_FILE_CONTENT" > .env
+        printf '%s' "$CLIENT_SECRET_CONTENT" > client_secret.json
+        printf '%s' "$TOKEN_CONTENT" > token.json
+        python -c "import json; json.load(open('token.json')); print('token.json OK')"
+        python -c "import json; json.load(open('client_secret.json')); print('client_secret.json OK')"
 
     - name: Run Blogger ES Bot
       run: python blogger_bot_es.py

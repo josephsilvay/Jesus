@@ -47,9 +47,7 @@ TEMAS_CASEIROS = [
 
 def get_blogger_service():
     creds = None
-    token_file = 'token_es.json'
-    if os.path.exists('token.json') and not os.path.exists(token_file):
-        token_file = 'token.json'
+    token_file = 'token.json'
     if os.path.exists(token_file):
         creds = Credentials.from_authorized_user_file(token_file, SCOPES)
     if not creds or not creds.valid:

@@ -3,7 +3,7 @@ name: Blogger Trends Hourly Bot
 on:
   schedule:
     - cron: '0 * * * *'  # Executa a cada hora
-  workflow_dispatch:      # Permite execução manual na interface do GitHub
+  workflow_dispatch:
 
 jobs:
   run-bot:
@@ -26,13 +26,15 @@ jobs:
 
     - name: Recreate config and credentials files
       env:
-        ENV_FILE: ${{ secrets.ENV_FILE }}
-        CLIENT_SECRET_JSON: ${{ secrets.CLIENT_SECRET_JSON }}
-        TOKEN_JSON: ${{ secrets.TOKEN_JSON }}
+        ENV_FILE_CONTENT: ${{ secrets.ENV_FILE }}
+        CLIENT_SECRET_CONTENT: ${{ secrets.CLIENT_SECRET_JSON }}
+        TOKEN_CONTENT: ${{ secrets.TOKEN_JSON }}
       run: |
-        echo "$ENV_FILE" > .env
-        echo "$CLIENT_SECRET_JSON" > client_secret.json
-        echo "$TOKEN_JSON" > token.json
+        printf '%s' "$ENV_FILE_CONTENT" > .env
+        printf '%s' "$CLIENT_SECRET_CONTENT" > client_secret.json
+        printf '%s' "$TOKEN_CONTENT" > token.json
+        python -c "import json; json.load(open('token.json')); print('token.json OK')"
+        python -c "import json; json.load(open('client_secret.json')); print('client_secret.json OK')"
 
     - name: Run Blogger Bot
       run: python blogger_bot.py
