@@ -1,4 +1,5 @@
 import os
+from gemini_retry import call_gemini_with_retry
 import random
 import time
 import feedparser
@@ -155,16 +156,7 @@ def get_gemini_content(topic, context="", news_url=""):
     )
     
     payload = {"contents": [{"parts": [{"text": prompt}]}]}
-    headers = {"Content-Type": "application/json"}
-    
-    response = requests.post(url, json=payload, headers=headers)
-    response.raise_for_status()
-    data = response.json()
-    
-    candidate = data.get('candidates', [{}])[0].get('content', {}).get('parts', [{}])[0].get('text', '')
-    if not candidate:
-         raise Exception("O Gemini não retornou um formato valido.")
-    return candidate
+    return call_gemini_with_retry(url, payload)
 
 def parse_gemini_output(text):
     """Separa as peças Title, Keyword, Labels e Content."""

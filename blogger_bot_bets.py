@@ -1,4 +1,5 @@
 import os
+from gemini_retry import call_gemini_with_retry
 import random
 import feedparser
 import urllib.parse
@@ -147,10 +148,7 @@ def get_gemini_content_bets(topic, context="", news_url=""):
     )
 
     payload = {"contents": [{"parts": [{"text": prompt}]}]}
-    response = requests.post(url, json=payload, headers={"Content-Type": "application/json"})
-    response.raise_for_status()
-    data = response.json()
-    return data.get('candidates', [{}])[0].get('content', {}).get('parts', [{}])[0].get('text', '')
+    return call_gemini_with_retry(url, payload)
 
 def parse_gemini_output(text):
     import re
