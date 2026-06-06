@@ -63,44 +63,65 @@ def get_blogger_service():
             token.write(creds.to_json())
     return build('blogger', 'v3', credentials=creds)
 
+def _en_topic_is_relevant(title: str) -> bool:
+    """Returns True only if the trending topic is genuinely about home/health/cooking."""
+    t = title.lower()
+
+    positive_kw = [
+        'clean', 'cleaning', 'home', 'house', 'kitchen', 'remedy', 'remedies',
+        'health', 'recipe', 'recipes', 'plant', 'natural', 'saving', 'savings',
+        'tip', 'tips', 'garden', 'gardening', 'laundry', 'stain', 'stains',
+        'hack', 'hacks', 'diy', 'organiz', 'food', 'cooking', 'baking',
+        'pest', 'vinegar', 'baking soda', 'lemon', 'ingredient', 'smell',
+        'odor', 'mold', 'drain', 'grout', 'declutter', 'storage',
+    ]
+
+    negative_kw = [
+        'nba', 'nfl', 'mlb', 'nhl', 'fifa', 'champions', 'league',
+        'playoff', 'finals', 'semifinal', 'tournament', 'match',
+        'football', 'basketball', 'baseball', 'soccer', 'tennis',
+        'boxing', 'ufc', 'wrestling', 'formula 1', 'nascar',
+        'president', 'congress', 'senate', 'election', 'political', 'government',
+        'killed', 'injured', 'accident', 'shooting', 'disaster', 'earthquake',
+        'hurricane', 'flood', 'fire', 'crime', 'murder', 'arrest',
+        'stock', 'bitcoin', 'crypto', 'market', 'economy', 'inflation',
+        'movie', 'actor', 'singer', 'concert', 'album', 'awards', 'oscars',
+        ' vs ', 'score', 'standings', 'draft', 'trade', 'contract',
+    ]
+
+    has_positive = any(kw in t for kw in positive_kw)
+    has_negative = any(kw in t for kw in negative_kw)
+    return has_positive and not has_negative
+
 def get_trending_topic_en():
-    """Fetches trending topics from English-speaking countries."""
+    """Fetches trending topics — only home/health/cooking niche topics."""
     geo = random.choice(TRENDING_COUNTRIES)
     print(f"[1] Fetching trending topics in {COUNTRY_NAMES[geo]} (Google Trends)...")
-
-    home_keywords = [
-        'clean', 'home', 'house', 'kitchen', 'remedy', 'health', 'recipe',
-        'plant', 'natural', 'save', 'tip', 'garden', 'laundry', 'stain',
-        'hack', 'diy', 'organiz', 'food', 'cook', 'baking', 'pest'
-    ]
 
     try:
         r = requests.get(f"https://trends.google.com/trending/rss?geo={geo}", timeout=15)
         r.raise_for_status()
         feed = feedparser.parse(r.content)
         if feed.entries:
-            relevant = [e for e in feed.entries[:25]
-                        if any(kw in e.title.lower() for kw in home_keywords)]
-            # Only use trending if genuinely relevant to home tips niche
-            if not relevant:
-                tip = random.choice(TIPS_FALLBACK)
-                print(f"  -> No relevant trending topic. Fixed topic: {tip}")
-                return tip, "Popular home tip highly searched in English-speaking countries.", "", geo
+            relevant = [e for e in feed.entries[:25] if _en_topic_is_relevant(e.title)]
 
-            item = random.choice(relevant)
-            traffic = item.get('ht_approx_traffic', 'high volume')
-            news_url = item.get('ht_news_item_url', '')
-            news_source = item.get('ht_news_item_source', '')
-            context = (f"Trending in {COUNTRY_NAMES[geo]} with {traffic} searches. "
-                       f"Coverage: {news_source}.")
-            print(f"  -> Trending: {item.title}")
-            return item.title, context, news_url, geo
+            if relevant:
+                item = random.choice(relevant)
+                traffic = item.get('ht_approx_traffic', 'high volume')
+                news_url = item.get('ht_news_item_url', '')
+                news_source = item.get('ht_news_item_source', '')
+                context = (f"Trending in {COUNTRY_NAMES[geo]} with {traffic} searches. "
+                           f"Coverage: {news_source}.")
+                print(f"  -> Trending: {item.title}")
+                return item.title, context, news_url, geo
+            else:
+                print(f"  -> No relevant trending topic. Using fixed topic.")
     except Exception as e:
-        print(f"  Fallback (error: {e})")
+        print(f"  -> Error: {e}. Using fixed topic.")
 
     tip = random.choice(TIPS_FALLBACK)
     print(f"  -> Fixed topic: {tip}")
-    return tip, "Popular home tip highly searched in English-speaking countries.", "", "US"
+    return tip, "Popular home tip highly searched in English-speaking countries.", "", geo
 
 def get_gemini_content_en(topic, context="", news_url="", geo="US"):
     print(f"[2] Generating English article about '{topic}'...")
