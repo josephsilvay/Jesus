@@ -82,6 +82,10 @@ def get_trending_topic_acoes():
                        f"Cobertura: {news_source}.")
             print(f"  -> Trends: {item.title}")
             return item.title, context, news_url
+        else:
+            pauta = random.choice(PAUTAS_FALLBACK)
+            print(f"  -> Sem trending relevante. Pauta fixa: {pauta}")
+            return pauta, "", ""
     except Exception as e:
         print(f"  Trends falhou ({e}), tentando Google News...")
 
@@ -100,6 +104,7 @@ def get_trending_topic_acoes():
     except Exception as e:
         print(f"  News falhou ({e})")
 
+    # Último fallback: pauta fixa do nicho de ações
     pauta = random.choice(PAUTAS_FALLBACK)
     print(f"  -> Pauta fixa: {pauta}")
     return pauta, "", ""

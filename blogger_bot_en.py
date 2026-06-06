@@ -81,7 +81,13 @@ def get_trending_topic_en():
         if feed.entries:
             relevant = [e for e in feed.entries[:25]
                         if any(kw in e.title.lower() for kw in home_keywords)]
-            item = random.choice(relevant) if relevant else random.choice(feed.entries[:15])
+            # Only use trending if genuinely relevant to home tips niche
+            if not relevant:
+                tip = random.choice(TIPS_FALLBACK)
+                print(f"  -> No relevant trending topic. Fixed topic: {tip}")
+                return tip, "Popular home tip highly searched in English-speaking countries.", "", geo
+
+            item = random.choice(relevant)
             traffic = item.get('ht_approx_traffic', 'high volume')
             news_url = item.get('ht_news_item_url', '')
             news_source = item.get('ht_news_item_source', '')
