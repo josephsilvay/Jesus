@@ -1133,7 +1133,7 @@
       
       // Configuração do Google AdSense
       adsense: {
-        publisherId: 'ca-pub-XXXXXXXXXXXXXXX', // Cole seu ID de editor AdSense aqui
+        publisherId: 'ca-pub-6705935644148297', // Cole seu ID de editor AdSense aqui
         slots: {
           top: 'XXXXXXXXXX',     // ID do bloco superior
           result: 'XXXXXXXXXX',  // ID do bloco de resultado (Alto CTR)
@@ -1155,7 +1155,7 @@
     // ═══════════════════════════════════════════════
     function loadAd(elementId, slotId, format = 'auto') {
       const container = document.getElementById(elementId);
-      if (!container || !slotId || slotId === 'XXXXXXXXXX' || CONFIG.adsense.publisherId === 'ca-pub-XXXXXXXXXXXXXXX') {
+      if (!container || !slotId || slotId === 'XXXXXXXXXX' || CONFIG.adsense.publisherId === 'ca-pub-6705935644148297') {
         return; // Mantém o placeholder padrão caso não esteja configurado
       }
       
@@ -1183,7 +1183,7 @@
 
     // Carregar os scripts do AdSense se configurado
     function initializeAdsense() {
-      if (CONFIG.adsense.publisherId !== 'ca-pub-XXXXXXXXXXXXXXX') {
+      if (CONFIG.adsense.publisherId !== 'ca-pub-6705935644148297') {
         const adScript = document.createElement('script');
         adScript.async = true;
         adScript.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${CONFIG.adsense.publisherId}`;
