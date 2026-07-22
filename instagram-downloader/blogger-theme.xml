@@ -790,6 +790,72 @@
         margin: 0 auto;
       }
     }
+    
+    /*--------------------------------------------------
+    MAXIMIZED ADSENSE LAYOUT CHANGES
+    --------------------------------------------------*/
+    .homepage-layout {
+      display: grid;
+      grid-template-columns: 160px 1fr 160px;
+      gap: 30px;
+      align-items: start;
+      margin-bottom: 40px;
+    }
+
+    .main-content-area {
+      min-width: 0;
+    }
+
+    .sky-ad {
+      position: sticky;
+      top: 100px;
+      width: 160px;
+      height: 600px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px dashed var(--border);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .sky-ad::before {
+      content: 'ANÚNCIO SKYSCRAPER';
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.25);
+      letter-spacing: 1px;
+    }
+
+    .ad-inline {
+      width: 100%;
+      margin: 15px 0;
+      min-height: 90px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px dashed var(--border);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .ad-inline::before {
+      content: 'ANÚNCIO';
+      font-size: 0.65rem;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.2);
+    }
+
+    @media (max-width: 1140px) {
+      .homepage-layout {
+        grid-template-columns: 1fr;
+      }
+      .sky-ad {
+        display: none;
+      }
+    }
   ]]></b:skin>
 </head>
 <body>
@@ -815,76 +881,98 @@
 
     <b:if cond='data:blog.url == data:blog.homepageUrl'>
       <!-- ==========================================
-           VIEW: HOMEPAGE (FERRAMENTA PRINCIPAL)
+           VIEW: HOMEPAGE (FERRAMENTA PRINCIPAL COM ANÚNCIOS MAXIMIZADOS)
            ========================================== -->
-      <section class='hero'>
-        <h1 class='hero-title'>Baixar <span>Reels</span> do Instagram</h1>
-        <p class='hero-desc'>Insira o link do Reels do Instagram abaixo e baixe o vídeo em alta qualidade instantaneamente. 100% gratuito.</p>
+      <div class='homepage-layout'>
+        <!-- Lateral Esquerda (Skyscraper) -->
+        <aside class='sky-ad left-sky' id='ad-sky-left'/>
 
-        <!-- Painel Central do Downloader -->
-        <div class='downloader-card glass-panel'>
-          <div class='input-group'>
-            <div class='input-icon'>
-              <svg fill='none' height='20' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 24 24' width='20'>
-                <rect height='20' rx='5' ry='5' width='20' x='2' y='2'/>
-                <path d='M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z'/>
-                <line x1='17.5' x2='17.51' y1='6.5' y2='6.5'/>
-              </svg>
-            </div>
-            <input class='downloader-input' id='instagram-url' placeholder='Cole o link do Reels ou vídeo do Instagram aqui...' type='text'/>
-            <div class='input-actions'>
-              <button class='btn-action' id='btn-paste' type='button'>Colar</button>
-              <button class='btn-download' id='btn-submit' type='button'>
-                <span>Obter Vídeo</span>
-              </button>
-            </div>
-          </div>
+        <div class='main-content-area'>
+          <section class='hero'>
+            <h1 class='hero-title'>Baixar <span>Reels</span> do Instagram</h1>
+            <p class='hero-desc'>Insira o link do Reels do Instagram abaixo e baixe o vídeo em alta qualidade instantaneamente. 100% gratuito.</p>
 
-          <!-- Status de Carregamento -->
-          <div class='status-container' id='status-loader'>
-            <div class='spinner'/>
-            <div class='status-text'>Analisando o link, por favor aguarde...</div>
-          </div>
+            <!-- Painel Central do Downloader -->
+            <div class='downloader-card glass-panel'>
+              <!-- Bloco de Anúncios dentro do Card (Superior) -->
+              <div class='ad-slot ad-inline' id='ad-card-top' style='margin-bottom: 25px;'/>
 
-          <!-- Alerta de Erro -->
-          <div class='alert' id='error-alert'>
-            <svg fill='none' height='18' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='2.5' viewBox='0 0 24 24' width='18'>
-              <circle cx='12' cy='12' r='10'/>
-              <line x1='12' x2='12' y1='8' y2='12'/>
-              <line x1='12' x2='12.01' y1='16' y2='16'/>
-            </svg>
-            <span id='error-msg'/>
-          </div>
-
-          <!-- Resultados do Download -->
-          <div class='result-container' id='result-panel'>
-            <div class='result-grid'>
-              <div class='result-preview'>
-                <!-- Vídeo renderizado dinamicamente -->
-                <video controls='controls' id='result-video' playsinline='playsinline' poster=''/>
-              </div>
-              <div class='result-info'>
-                <span class='result-type-badge' id='result-badge'>Reel</span>
-                <h3 class='result-title' id='result-title-label'>Vídeo pronto para download</h3>
-                
-                <!-- AdSense Bloco de Resultado (Alto Ganho!) -->
-                <div class='ad-slot' id='ad-result' style='margin: 10px 0;'/>
-                
-                <a class='btn-action-download' href='#' id='download-anchor' target='_blank'>
-                  <svg fill='none' height='20' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='2.5' viewBox='0 0 24 24' width='20'>
-                    <path d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4'/>
-                    <polyline points='7 10 12 15 17 10'/>
-                    <line x1='12' x2='12' y1='15' y2='3'/>
+              <div class='input-group'>
+                <div class='input-icon'>
+                  <svg fill='none' height='20' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 24 24' width='20'>
+                    <rect height='20' rx='5' ry='5' width='20' x='2' y='2'/>
+                    <path d='M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z'/>
+                    <line x1='17.5' x2='17.51' y1='6.5' y2='6.5'/>
                   </svg>
-                  Fazer Download (MP4)
-                </a>
-                <p class='download-tip'>Dica: Se o vídeo abrir no navegador, toque no menu de 3 pontinhos e selecione "Fazer o download".</p>
-                <button class='btn-action btn-reset' id='btn-clear' type='button'>Baixar Outro</button>
+                </div>
+                <input class='downloader-input' id='instagram-url' placeholder='Cole o link do Reels ou vídeo do Instagram aqui...' type='text'/>
+                <div class='input-actions'>
+                  <button class='btn-action' id='btn-paste' type='button'>Colar</button>
+                  <button class='btn-download' id='btn-submit' type='button'>
+                    <span>Obter Vídeo</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Bloco de Anúncios dentro do Card (Inferior) -->
+              <div class='ad-slot ad-inline' id='ad-card-bottom' style='margin-top: 25px;'/>
+
+              <!-- Status de Carregamento com Placeholder de Anúncio Integrado -->
+              <div class='status-container' id='status-loader'>
+                <div class='spinner'/>
+                <div class='status-text' style='margin-bottom: 15px;'>Analisando o link, por favor aguarde...</div>
+                <!-- Anúncio de carregamento de alto impacto (carrega enquanto aguarda a API) -->
+                <div class='ad-slot ad-inline' id='ad-loader-slot' style='min-height: 250px; width: 100%; max-width: 336px; display: none;'/>
+              </div>
+
+              <!-- Alerta de Erro -->
+              <div class='alert' id='error-alert'>
+                <svg fill='none' height='18' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='2.5' viewBox='0 0 24 24' width='18'>
+                  <circle cx='12' cy='12' r='10'/>
+                  <line x1='12' x2='12' y1='8' y2='12'/>
+                  <line x1='12' x2='12.01' y1='16' y2='16'/>
+                </svg>
+                <span id='error-msg'/>
+              </div>
+
+              <!-- Resultados do Download -->
+              <div class='result-container' id='result-panel'>
+                <div class='result-grid'>
+                  <div class='result-preview'>
+                    <!-- Vídeo renderizado dinamicamente -->
+                    <video controls='controls' id='result-video' playsinline='playsinline' poster=''/>
+                  </div>
+                  <div class='result-info'>
+                    <span class='result-type-badge' id='result-badge'>Reel</span>
+                    <h3 class='result-title' id='result-title-label'>Vídeo pronto para download</h3>
+                    
+                    <!-- AdSense Bloco de Resultado (Anúncio acima do botão!) -->
+                    <div class='ad-slot' id='ad-result' style='margin: 10px 0; min-height: 250px;'/>
+                    
+                    <a class='btn-action-download' href='#' id='download-anchor' target='_blank'>
+                      <svg fill='none' height='20' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='2.5' viewBox='0 0 24 24' width='20'>
+                        <path d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4'/>
+                        <polyline points='7 10 12 15 17 10'/>
+                        <line x1='12' x2='12' y1='15' y2='3'/>
+                      </svg>
+                      Fazer Download (MP4)
+                    </a>
+                    
+                    <!-- Bloco de Anúncios Adicional colado abaixo do botão de download -->
+                    <div class='ad-slot ad-inline' id='ad-download-btn-bottom' style='margin-top: 15px; min-height: 90px;'/>
+
+                    <p class='download-tip'>Dica: Se o vídeo abrir no navegador, toque no menu de 3 pontinhos e selecione "Fazer o download".</p>
+                    <button class='btn-action btn-reset' id='btn-clear' type='button'>Baixar Outro</button>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
+          </section>
         </div>
-      </section>
+
+        <!-- Lateral Direita (Skyscraper) -->
+        <aside class='sky-ad right-sky' id='ad-sky-right'/>
+      </div>
 
       <!-- AdSense Meio -->
       <div class='ad-slot' id='ad-middle'/>
@@ -1051,7 +1139,13 @@
           result: 'XXXXXXXXXX',  // ID do bloco de resultado (Alto CTR)
           middle: 'XXXXXXXXXX',  // ID do bloco do meio
           sidebar: 'XXXXXXXXXX', // ID do bloco lateral (para posts)
-          bottom: 'XXXXXXXXXX'   // ID do bloco de rodapé
+          bottom: 'XXXXXXXXXX',   // ID do bloco de rodapé
+          leftSky: 'XXXXXXXXXX', // ID do skyscraper esquerdo
+          rightSky: 'XXXXXXXXXX', // ID do skyscraper direito
+          cardTop: 'XXXXXXXXXX', // ID do bloco superior do card
+          cardBottom: 'XXXXXXXXXX', // ID do bloco inferior do card
+          loader: 'XXXXXXXXXX', // ID do bloco exibido no loader
+          btnBottom: 'XXXXXXXXXX' // ID do bloco colado ao botão de download
         }
       }
     };
@@ -1101,6 +1195,12 @@
         loadAd('ad-middle', CONFIG.adsense.slots.middle);
         loadAd('ad-sidebar', CONFIG.adsense.slots.sidebar);
         loadAd('ad-bottom', CONFIG.adsense.slots.bottom);
+        
+        // Novos blocos iniciais da home
+        loadAd('ad-sky-left', CONFIG.adsense.slots.leftSky, 'vertical');
+        loadAd('ad-sky-right', CONFIG.adsense.slots.rightSky, 'vertical');
+        loadAd('ad-card-top', CONFIG.adsense.slots.cardTop, 'horizontal');
+        loadAd('ad-card-bottom', CONFIG.adsense.slots.cardBottom, 'horizontal');
       }
     }
 
@@ -1179,13 +1279,34 @@
       loader.style.display = 'flex';
       btnSubmit.disabled = true;
 
+      // Exibir e carregar anúncio no loader para máximo CTR
+      const adLoaderSlot = document.getElementById('ad-loader-slot');
+      if (adLoaderSlot) {
+        adLoaderSlot.style.display = 'flex';
+        loadAd('ad-loader-slot', CONFIG.adsense.slots.loader, 'rectangle');
+      }
+
       try {
+        // Obter elemento de texto do loader para mostrar status de processamento
+        const loaderText = loader.querySelector('.status-text');
+        
+        // Passo 1: Analisando link (Aguardar 1.5s para visualização do anúncio)
+        if (loaderText) loaderText.textContent = 'Verificando conexão e analisando o link...';
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        // Fazer a chamada da API
+        if (loaderText) loaderText.textContent = 'Gerando link de download de alta velocidade...';
         const response = await fetch(`${CONFIG.apiUrl}/api/download?url=${encodeURIComponent(url)}`);
         const result = await response.json();
 
+        // Passo 2: Finalizando (Aguardar mais 1.5s)
+        if (loaderText) loaderText.textContent = 'Link gerado! Carregando anúncio final...';
+        await new Promise(resolve => setTimeout(resolve, 1500));
+
         if (result.success && result.url) {
-          // Esconder loader
+          // Esconder loader e seu anúncio
           loader.style.display = 'none';
+          if (adLoaderSlot) adLoaderSlot.style.display = 'none';
           
           // Preencher painel de resultados
           resultVideo.src = result.url;
@@ -1201,13 +1322,16 @@
           // Mostrar resultado
           resultPanel.style.display = 'block';
           
-          // Carregar AdSense específico do resultado (se houver pub configurado)
+          // Carregar AdSense específico do resultado
           loadAd('ad-result', CONFIG.adsense.slots.result, 'rectangle');
+          loadAd('ad-download-btn-bottom', CONFIG.adsense.slots.btnBottom, 'horizontal');
         } else {
+          if (adLoaderSlot) adLoaderSlot.style.display = 'none';
           showError(result.error || 'Não conseguimos extrair o vídeo deste link. Verifique se o post é de uma conta pública.');
         }
       } catch (err) {
         console.error(err);
+        if (adLoaderSlot) adLoaderSlot.style.display = 'none';
         showError('Falha ao se conectar com os servidores de processamento. Tente novamente em alguns instantes.');
       }
     }
