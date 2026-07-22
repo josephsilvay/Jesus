@@ -4,18 +4,94 @@
 <head>
   <meta charset='utf-8'/>
   <meta content='width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no' name='viewport'/>
-  <title><data:blog.pageTitle/></title>
   
-  <!-- Meta tags de SEO e PWA -->
-  <meta content='Baixe vídeos, reels, fotos e stories do Instagram em alta qualidade de forma rápida, gratuita e sem limites.' name='description'/>
+  <!-- Títulos dinâmicos otimizados com palavras-chave de alto volume de buscas -->
+  <b:if cond='data:blog.url == data:blog.homepageUrl'>
+    <title>Baixar Vídeo do Instagram | Downloader de Reels, Fotos e Stories Grátis</title>
+  <b:else/>
+    <title><data:blog.pageName/> - InstaBaixar</title>
+  </b:if>
+  
+  <!-- Meta tags de SEO avançado e indexação -->
+  <meta content='Baixe vídeos, reels, fotos, stories e IGTV do Instagram em alta qualidade (HD) de forma rápida, gratuita e ilimitada. Sem precisar instalar apps.' name='description'/>
+  <meta content='baixar video do instagram, baixar reels, downloader instagram, salvar reels, salvar videos do instagram, instagram video downloader, baixar fotos instagram, baixar stories' name='keywords'/>
+  <meta content='index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1' name='robots'/>
+  <link expr:href='data:blog.url' rel='canonical'/>
   <meta content='#0c081e' name='theme-color'/>
   
+  <!-- Open Graph / Meta Tags de compartilhamento social -->
+  <meta expr:content='data:blog.pageTitle' property='og:site_name'/>
   <b:if cond='data:blog.url == data:blog.homepageUrl'>
     <meta content='website' property='og:type'/>
-    <meta content='InstaBaixar — Downloader de Reels do Instagram' property='og:title'/>
+    <meta content='Baixar Vídeo do Instagram | Downloader de Reels, Fotos e Stories Grátis' property='og:title'/>
+    <meta content='Baixe vídeos, reels, fotos e stories do Instagram em alta qualidade (HD) de forma rápida, gratuita e ilimitada.' property='og:description'/>
   <b:else/>
     <meta content='article' property='og:type'/>
+    <meta expr:content='data:blog.pageName' property='og:title'/>
+    <meta expr:content='data:blog.metaDescription' property='og:description'/>
   </b:if>
+  <meta expr:content='data:blog.url' property='og:url'/>
+  <meta content='https://www.blogger.com/img/logo_blogger_40px.png' property='og:image'/>
+  
+  <!-- Dados Estruturados Schema.org para o Google (SEO para ferramentas) -->
+  <script type='application/ld+json'>//<![CDATA[
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "InstaBaixar",
+    "url": "https://www.jornalmetro.com.br",
+    "description": "Baixe vídeos, reels, fotos e stories do Instagram em alta qualidade de forma rápida e gratuita.",
+    "applicationCategory": "UtilityApplication",
+    "operatingSystem": "All",
+    "browserRequirements": "Requires HTML5",
+    "offers": {
+      "@type": "Offer",
+      "price": "0.00",
+      "priceCurrency": "USD"
+    }
+  }
+  //]]></script>
+
+  <script type='application/ld+json'>//<![CDATA[
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Como baixar vídeos e Reels do Instagram no celular?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Basta copiar o link do Reels ou vídeo no aplicativo do Instagram, abrir o InstaBaixar no navegador do celular, colar o link e tocar em obter vídeo. Em seguida, clique no botão para salvar o arquivo MP4 diretamente."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "A ferramenta de download do Instagram é gratuita?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Sim! O InstaBaixar é 100% gratuito e ilimitado. Você pode salvar quantos Reels e vídeos quiser sem precisar pagar nada ou criar contas."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Preciso fazer login com minha conta do Instagram?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Não, você não precisa fazer login ou informar sua senha do Instagram. Nossa ferramenta acessa apenas mídias públicas de forma totalmente segura."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Posso baixar vídeos de contas privadas?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Não. Por questões de segurança e privacidade da API do Instagram, apenas mídias de perfis públicos podem ser baixadas pelo nosso sistema."
+        }
+      }
+    ]
+  }
+  //]]></script>
   
   <!-- Fontes do Google -->
   <link href='https://fonts.googleapis.com' rel='preconnect'/>
