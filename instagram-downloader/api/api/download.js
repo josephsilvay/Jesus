@@ -42,60 +42,97 @@ module.exports = async function handler(req, res) {
   let title = "Instagram Media";
   let errors = [];
 
-  // Método 1: snapsave-media-downloader (Scraper do SnapSave.app)
+  // Método 1: Scraper SaveIG.app (Muito estável, retorna HTML limpo em JSON)
   try {
-    console.log("[API] Tentando Método 1 (snapsave-media-downloader)...");
-    const { snapsave } = await import("snapsave-media-downloader");
-    const response = await snapsave(url);
-    console.log("[API] Resposta snapsave:", JSON.stringify(response));
+    console.log("[API] Tentando Método 1 (SaveIG API)...");
+    const params = new URLSearchParams();
+    params.append('q', url);
+    params.append('t', 'media');
+    params.append('lang', 'en');
 
-    if (response && response.success && response.data && response.data.media && response.data.media.length > 0) {
-      const bestMedia = response.data.media[0];
-      mediaUrl = bestMedia.url;
-      mediaType = bestMedia.type || "video";
-      title = response.data.description || "Instagram Media";
-      success = true;
-      console.log("[API] Sucesso com snapsave-media-downloader!");
+    const saveigResponse = await fetch('https://saveig.app/api/ajaxSearch', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      body: params.toString()
+    });
+
+    if (saveigResponse.ok) {
+      const data = await saveigResponse.json();
+      if (data && data.status === 'ok' && data.data) {
+        const html = data.data;
+        
+        // Extrair o link direto do vídeo/imagem do HTML usando Regex
+        // Os links do CDN da Meta Geralmente contêm "fbcdn.net" ou "instagram.com" e estão no atributo href
+        const hrefRegex = /href="([^"]+)"/g;
+        let match;
+        const links = [];
+        
+        while ((match = hrefRegex.exec(html)) !== null) {
+          let link = match[1].replace(/&amp;/g, '&');
+          // Evitar links de redirecionamento ou vazios
+          if (link.includes("fbcdn.net") || link.includes("instagram.com") || link.includes("download")) {
+            links.push(link);
+          }
+        }
+
+        if (links.length > 0) {
+          mediaUrl = links[0];
+          // Detectar se é imagem
+          if (html.includes("download-image") || mediaUrl.includes(".jpg") || mediaUrl.includes(".png") || mediaUrl.includes(".webp")) {
+            mediaType = "image";
+          } else {
+            mediaType = "video";
+          }
+          success = true;
+          console.log("[API] Sucesso com SaveIG API!");
+        } else {
+          errors.push("SaveIG: Nenhum link de download válido encontrado no HTML.");
+        }
+      } else {
+        errors.push("SaveIG: Resposta com status inválido.");
+      }
     } else {
-      errors.push("SnapSave: " + ((response && response.message) || "Sem mídia retornada"));
+      errors.push(`SaveIG: HTTP ${saveigResponse.status}`);
     }
   } catch (error) {
-    console.error("[API] Erro no snapsave-media-downloader:", error.message);
-    errors.push("SnapSave: " + error.message);
+    console.error("[API] Erro na SaveIG API:", error.message);
+    errors.push("SaveIG: " + error.message);
   }
 
-  // Método 2: Fallback para @bochilteam/scraper (Instagram Downloader)
+  // Método 2: snapsave-media-downloader (Fallback)
   if (!success) {
     try {
-      console.log("[API] Tentando Método 2 (@bochilteam/scraper)...");
-      const { instagram } = await import("@bochilteam/scraper");
-      const bochilRes = await instagram(url);
-      console.log("[API] Resposta bochilteam:", JSON.stringify(bochilRes));
+      console.log("[API] Tentando Método 2 (snapsave-media-downloader)...");
+      const { snapsave } = await import("snapsave-media-downloader");
+      const response = await snapsave(url);
 
-      if (bochilRes && bochilRes.length > 0) {
-        // Bochilteam retorna array de strings ou objetos
-        const bestMedia = bochilRes[0];
-        mediaUrl = typeof bestMedia === "string" ? bestMedia : bestMedia.url;
-        mediaType = "video"; // Geralmente reels/vídeos
+      if (response && response.success && response.data && response.data.media && response.data.media.length > 0) {
+        const bestMedia = response.data.media[0];
+        mediaUrl = bestMedia.url;
+        mediaType = bestMedia.type || "video";
+        title = response.data.description || "Instagram Media";
         success = true;
-        console.log("[API] Sucesso com @bochilteam/scraper!");
+        console.log("[API] Sucesso com snapsave-media-downloader!");
       } else {
-        errors.push("Bochilteam: Sem mídia retornada");
+        errors.push("SnapSave: " + ((response && response.message) || "Sem mídia retornada"));
       }
     } catch (error) {
-      console.error("[API] Erro no @bochilteam/scraper:", error.message);
-      errors.push("Bochilteam: " + error.message);
+      console.error("[API] Erro no snapsave-media-downloader:", error.message);
+      errors.push("SnapSave: " + error.message);
     }
   }
 
-  // Método 3: Fallback para API pública alternativa
+  // Método 3: API pública alternativa (Vyturex)
   if (!success) {
     try {
       console.log("[API] Tentando Método 3 (API Pública Vyturex)...");
-      const fetchResponse = await fetch(`https://api.vyturex.com/instagram?url=${encodeURIComponent(url)}`);
-      if (fetchResponse.ok) {
-        const data = await fetchResponse.json();
-        console.log("[API] Resposta Vyturex:", JSON.stringify(data));
+      const vyturexResponse = await fetch(`https://api.vyturex.com/instagram?url=${encodeURIComponent(url)}`);
+      if (vyturexResponse.ok) {
+        const data = await vyturexResponse.json();
         if (data && data.url) {
           mediaUrl = data.url;
           mediaType = "video";
@@ -105,7 +142,7 @@ module.exports = async function handler(req, res) {
           errors.push("Vyturex: Sem URL no JSON");
         }
       } else {
-        errors.push(`Vyturex HTTP ${fetchResponse.status}`);
+        errors.push(`Vyturex: HTTP ${vyturexResponse.status}`);
       }
     } catch (error) {
       console.error("[API] Erro na API Vyturex:", error.message);
@@ -127,7 +164,7 @@ module.exports = async function handler(req, res) {
   console.error("[API] Todos os métodos falharam:", errors);
   return res.status(422).json({
     success: false,
-    error: "Não foi possível extrair o vídeo. Verifique se o post é público e tente novamente.",
+    error: "Não foi possível extrair o vídeo. Verifique se o post é de uma conta pública e tente novamente.",
     details: errors
   });
 };
