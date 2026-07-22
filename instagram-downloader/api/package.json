@@ -1,0 +1,10 @@
+{
+  "name": "instagram-downloader-api",
+  "version": "1.0.0",
+  "description": "Serverless API for Instagram Reels Downloader",
+  "main": "api/download.js",
+  "dependencies": {
+    "@bochilteam/scraper": "^5.0.1",
+    "snapsave-media-downloader": "^2.4.0"
+  }
+}

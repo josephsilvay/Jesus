@@ -5,6 +5,10 @@ __pycache__/
 *.zip
 *.mp3
 
+# Node dependencies
+node_modules/
+node_modules
+
 # Credentials & Tokens
 token.json
 client_secret.json

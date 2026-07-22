@@ -1,0 +1,1259 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<html b:css='false' b:defaultmessages='false' b:js='false' b:responsive='true' b:templatesVersion='1.0.0' expr:dir='data:blog.languageDirection' xmlns='http://www.w3.org/1999/xhtml' xmlns:b='http://www.google.com/2005/gml/b' xmlns:data='http://www.google.com/2005/gml/data' xmlns:expr='http://www.google.com/2005/gml/expr'>
+<head>
+  <meta charset='utf-8'/>
+  <meta content='width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no' name='viewport'/>
+  <title><data:blog.pageTitle/></title>
+  
+  <!-- Meta tags de SEO e PWA -->
+  <meta content='Baixe vídeos, reels, fotos e stories do Instagram em alta qualidade de forma rápida, gratuita e sem limites.' name='description'/>
+  <meta content='#0c081e' name='theme-color'/>
+  
+  <b:if cond='data:blog.url == data:blog.homepageUrl'>
+    <meta content='website' property='og:type'/>
+    <meta content='InstaBaixar — Downloader de Reels do Instagram' property='og:title'/>
+  <b:else/>
+    <meta content='article' property='og:type'/>
+  </b:if>
+  
+  <!-- Fontes do Google -->
+  <link href='https://fonts.googleapis.com' rel='preconnect'/>
+  <link crossorigin='anonymous' href='https://fonts.gstatic.com' rel='preconnect'/>
+  <link href='https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&amp;display=swap' rel='stylesheet'/>
+
+  <b:skin><![CDATA[
+    /*--------------------------------------------------
+    CSS RESET & CORE VARIABLES
+    --------------------------------------------------*/
+    :root {
+      --bg-dark: #070412;
+      --bg-card: rgba(18, 12, 38, 0.65);
+      --bg-input: rgba(255, 255, 255, 0.04);
+      --primary-grad: linear-gradient(135deg, #818cf8 0%, #c084fc 50%, #f472b6 100%);
+      --accent: #818cf8;
+      --accent-glow: rgba(129, 140, 248, 0.3);
+      --text: #f3f4f6;
+      --text-muted: #9ca3af;
+      --border: rgba(255, 255, 255, 0.08);
+      --border-focus: rgba(129, 140, 248, 0.5);
+      --success: #34d399;
+      --error: #f87171;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Outfit', sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      background: radial-gradient(ellipse at 50% 0%, #150f38 0%, #070412 80%);
+      background-attachment: fixed;
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /*--------------------------------------------------
+    UI UTILITIES
+    --------------------------------------------------*/
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    .glass-panel {
+      background: var(--bg-card);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+    }
+
+    /*--------------------------------------------------
+    HEADER / NAVBAR
+    --------------------------------------------------*/
+    header {
+      padding: 20px 0;
+      border-bottom: 1px solid var(--border);
+      background: rgba(7, 4, 18, 0.6);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .nav-wrap {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+
+    .logo-icon {
+      font-size: 1.8rem;
+      background: var(--primary-grad);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-weight: 800;
+    }
+
+    .logo-text {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: 0.5px;
+    }
+
+    .logo-text span {
+      background: var(--primary-grad);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 24px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.95rem;
+      font-weight: 500;
+      transition: color 0.25s;
+    }
+
+    .nav-links a:hover {
+      color: #fff;
+    }
+
+    /*--------------------------------------------------
+    HERO / DOWNLOADER CARD
+    --------------------------------------------------*/
+    .hero {
+      padding: 60px 0 40px;
+      text-align: center;
+    }
+
+    .hero-title {
+      font-size: 2.8rem;
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 12px;
+      letter-spacing: -0.5px;
+      background: linear-gradient(to right, #ffffff 30%, #dcd7fc 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-title span {
+      background: var(--primary-grad);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-desc {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      max-width: 600px;
+      margin: 0 auto 40px;
+      font-weight: 400;
+    }
+
+    .downloader-card {
+      max-width: 780px;
+      margin: 0 auto 30px;
+      padding: 35px;
+      text-align: left;
+    }
+
+    .input-group {
+      display: flex;
+      gap: 12px;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      padding: 8px 8px 8px 18px;
+      border-radius: 20px;
+      align-items: center;
+      transition: all 0.3s;
+      position: relative;
+    }
+
+    .input-group:focus-within {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 15px var(--accent-glow);
+    }
+
+    .input-icon {
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .downloader-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: #fff;
+      font-size: 1rem;
+      outline: none;
+      padding: 8px 0;
+    }
+
+    .downloader-input::placeholder {
+      color: #6b7280;
+    }
+
+    .input-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .btn-action {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      color: var(--text);
+      cursor: pointer;
+      padding: 8px 14px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .btn-action:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-download {
+      background: var(--primary-grad);
+      border: none;
+      color: #0d0926;
+      cursor: pointer;
+      padding: 12px 28px;
+      border-radius: 14px;
+      font-size: 1rem;
+      font-weight: 700;
+      box-shadow: 0 4px 20px rgba(192, 132, 252, 0.3);
+      transition: all 0.25s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-download:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 24px rgba(192, 132, 252, 0.55);
+      opacity: 0.95;
+    }
+
+    .btn-download:disabled {
+      background: #374151;
+      color: #6b7280;
+      cursor: not-allowed;
+      box-shadow: none;
+      transform: none;
+    }
+
+    /*--------------------------------------------------
+    LOADER & STATUS
+    --------------------------------------------------*/
+    .status-container {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 30px 0 10px;
+      gap: 15px;
+    }
+
+    .spinner {
+      width: 48px;
+      height: 48px;
+      border: 4px solid rgba(129, 140, 248, 0.15);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 1s infinite linear;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .status-text {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      animation: pulse 1.5s infinite ease-in-out;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.6; }
+      50% { opacity: 1; }
+    }
+
+    .alert {
+      display: none;
+      background: rgba(248, 113, 113, 0.1);
+      border: 1px solid rgba(248, 113, 113, 0.25);
+      color: var(--error);
+      padding: 14px 18px;
+      border-radius: 16px;
+      margin-top: 20px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /*--------------------------------------------------
+    RESULT PANEL
+    --------------------------------------------------*/
+    .result-container {
+      display: none;
+      margin-top: 30px;
+      border-top: 1px solid var(--border);
+      padding-top: 30px;
+      animation: slideDown 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .result-grid {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      gap: 25px;
+    }
+
+    .result-preview {
+      width: 100%;
+      aspect-ratio: 9/16;
+      border-radius: 18px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: #000;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .result-preview video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .result-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .result-info {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 15px;
+    }
+
+    .result-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .result-type-badge {
+      display: inline-flex;
+      align-self: flex-start;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border);
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      color: var(--accent);
+    }
+
+    .btn-action-download {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: #fff;
+      font-weight: 700;
+      padding: 14px 30px;
+      border-radius: 14px;
+      border: none;
+      text-decoration: none;
+      font-size: 1.05rem;
+      text-align: center;
+      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+      transition: all 0.2s;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .btn-action-download:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5);
+    }
+
+    .download-tip {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 5px;
+      line-height: 1.4;
+    }
+
+    .btn-reset {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      align-self: flex-start;
+      margin-top: 10px;
+    }
+
+    .btn-reset:hover {
+      border-color: rgba(255, 255, 255, 0.2);
+      color: #fff;
+    }
+
+    /*--------------------------------------------------
+    ADSENSE SLOTS (Sleek Placeholders)
+    --------------------------------------------------*/
+    .ad-slot {
+      margin: 40px auto;
+      text-align: center;
+      max-width: 728px;
+      min-height: 90px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px dashed var(--border);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .ad-slot::before {
+      content: 'ANÚNCIO';
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.25);
+      letter-spacing: 1px;
+    }
+
+    .ad-slot ins {
+      width: 100%;
+      display: block;
+    }
+
+    /*--------------------------------------------------
+    STEPS SECTION
+    --------------------------------------------------*/
+    .section-title {
+      font-size: 2rem;
+      font-weight: 800;
+      text-align: center;
+      margin-bottom: 40px;
+      color: #fff;
+    }
+
+    .steps-section {
+      padding: 60px 0;
+    }
+
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 30px;
+    }
+
+    .step-card {
+      padding: 30px;
+      text-align: center;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      transition: all 0.3s;
+    }
+
+    .step-card:hover {
+      border-color: rgba(129, 140, 248, 0.25);
+      transform: translateY(-4px);
+    }
+
+    .step-num {
+      width: 48px;
+      height: 48px;
+      background: var(--primary-grad);
+      color: #0d0926;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      font-weight: 800;
+      margin: 0 auto 20px;
+      box-shadow: 0 4px 15px rgba(192, 132, 252, 0.25);
+    }
+
+    .step-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 10px;
+    }
+
+    .step-desc {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /*--------------------------------------------------
+    FEATURES GRID
+    --------------------------------------------------*/
+    .features-section {
+      padding: 60px 0;
+      background: rgba(255, 255, 255, 0.01);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 25px;
+    }
+
+    .feature-card {
+      padding: 30px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .feature-icon {
+      font-size: 2rem;
+      color: var(--accent);
+    }
+
+    .feature-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .feature-desc {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /*--------------------------------------------------
+    FAQ SECTION (ACCORDION)
+    --------------------------------------------------*/
+    .faq-section {
+      padding: 80px 0 100px;
+    }
+
+    .faq-wrap {
+      max-width: 800px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .faq-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      overflow: hidden;
+      transition: all 0.3s;
+    }
+
+    .faq-trigger {
+      width: 100%;
+      padding: 22px 28px;
+      background: transparent;
+      border: none;
+      color: #fff;
+      font-size: 1.05rem;
+      font-weight: 600;
+      text-align: left;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      outline: none;
+    }
+
+    .faq-trigger::after {
+      content: '+';
+      font-size: 1.5rem;
+      color: var(--text-muted);
+      font-weight: 400;
+      transition: transform 0.25s;
+    }
+
+    .faq-item.active {
+      border-color: rgba(129, 140, 248, 0.25);
+    }
+
+    .faq-item.active .faq-trigger::after {
+      transform: rotate(45deg);
+      color: #fff;
+    }
+
+    .faq-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease-out;
+    }
+
+    .faq-content-inner {
+      padding: 0 28px 22px;
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    /*--------------------------------------------------
+    SEO ARTICLE (POST VIEW)
+    --------------------------------------------------*/
+    .article-layout {
+      padding: 50px 0 80px;
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 40px;
+    }
+
+    .seo-article {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      padding: 40px;
+      border-radius: 24px;
+    }
+
+    .seo-article h1 {
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 20px;
+      line-height: 1.25;
+    }
+
+    .seo-article h2 {
+      font-size: 1.5rem;
+      color: #fff;
+      margin: 35px 0 15px;
+      font-weight: 700;
+    }
+
+    .seo-article p {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+      line-height: 1.7;
+    }
+
+    .seo-article ul, .seo-article ol {
+      margin: 15px 0 25px 20px;
+      color: var(--text-muted);
+    }
+
+    .seo-article li {
+      margin-bottom: 8px;
+    }
+
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+    }
+
+    .sidebar-widget {
+      padding: 30px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+    }
+
+    .sidebar-widget-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 15px;
+    }
+
+    /*--------------------------------------------------
+    FOOTER
+    --------------------------------------------------*/
+    footer {
+      border-top: 1px solid var(--border);
+      background: #04020a;
+      padding: 40px 0;
+      text-align: center;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-bottom: 15px;
+    }
+
+    .footer-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .footer-links a:hover {
+      color: #fff;
+    }
+
+    /*--------------------------------------------------
+    RESPONSIVENESS (MEDIA QUERIES)
+    --------------------------------------------------*/
+    @media (max-width: 968px) {
+      .steps-grid, .features-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+      .article-layout {
+        grid-template-columns: 1fr;
+      }
+      .hero-title {
+        font-size: 2.2rem;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .downloader-card {
+        padding: 20px;
+      }
+      .input-group {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 12px;
+      }
+      .input-icon {
+        display: none;
+      }
+      .input-actions {
+        margin-top: 10px;
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .btn-download {
+        justify-content: center;
+      }
+      .result-grid {
+        grid-template-columns: 1fr;
+      }
+      .result-preview {
+        max-width: 240px;
+        margin: 0 auto;
+      }
+    }
+  ]]></b:skin>
+</head>
+<body>
+
+  <!-- Menu de Navegação Global -->
+  <header>
+    <div class='container nav-wrap'>
+      <a class='logo' href='/'>
+        <div class='logo-icon'>✨</div>
+        <div class='logo-text'>Insta<span>Baixar</span></div>
+      </a>
+      <ul class='nav-links'>
+        <li><a href='/'>Início</a></li>
+        <li><a href='#como-usar'>Como Usar</a></li>
+        <li><a href='#faq'>FAQ</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <div class='container'>
+    <!-- AdSense Topo (Se configurado) -->
+    <div class='ad-slot' id='ad-top'/>
+
+    <b:if cond='data:blog.url == data:blog.homepageUrl'>
+      <!-- ==========================================
+           VIEW: HOMEPAGE (FERRAMENTA PRINCIPAL)
+           ========================================== -->
+      <section class='hero'>
+        <h1 class='hero-title'>Baixar <span>Reels</span> do Instagram</h1>
+        <p class='hero-desc'>Insira o link do Reels do Instagram abaixo e baixe o vídeo em alta qualidade instantaneamente. 100% gratuito.</p>
+
+        <!-- Painel Central do Downloader -->
+        <div class='downloader-card glass-panel'>
+          <div class='input-group'>
+            <div class='input-icon'>
+              <svg fill='none' height='20' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 24 24' width='20'>
+                <rect height='20' rx='5' ry='5' width='20' x='2' y='2'/>
+                <path d='M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z'/>
+                <line x1='17.5' x2='17.51' y1='6.5' y2='6.5'/>
+              </svg>
+            </div>
+            <input class='downloader-input' id='instagram-url' placeholder='Cole o link do Reels ou vídeo do Instagram aqui...' type='text'/>
+            <div class='input-actions'>
+              <button class='btn-action' id='btn-paste' type='button'>Colar</button>
+              <button class='btn-download' id='btn-submit' type='button'>
+                <span>Obter Vídeo</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Status de Carregamento -->
+          <div class='status-container' id='status-loader'>
+            <div class='spinner'/>
+            <div class='status-text'>Analisando o link, por favor aguarde...</div>
+          </div>
+
+          <!-- Alerta de Erro -->
+          <div class='alert' id='error-alert'>
+            <svg fill='none' height='18' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='2.5' viewBox='0 0 24 24' width='18'>
+              <circle cx='12' cy='12' r='10'/>
+              <line x1='12' x2='12' y1='8' y2='12'/>
+              <line x1='12' x2='12.01' y1='16' y2='16'/>
+            </svg>
+            <span id='error-msg'/>
+          </div>
+
+          <!-- Resultados do Download -->
+          <div class='result-container' id='result-panel'>
+            <div class='result-grid'>
+              <div class='result-preview'>
+                <!-- Vídeo renderizado dinamicamente -->
+                <video controls='controls' id='result-video' playsinline='playsinline' poster=''/>
+              </div>
+              <div class='result-info'>
+                <span class='result-type-badge' id='result-badge'>Reel</span>
+                <h3 class='result-title' id='result-title-label'>Vídeo pronto para download</h3>
+                
+                <!-- AdSense Bloco de Resultado (Alto Ganho!) -->
+                <div class='ad-slot' id='ad-result' style='margin: 10px 0;'/>
+                
+                <a class='btn-action-download' href='#' id='download-anchor' target='_blank'>
+                  <svg fill='none' height='20' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='2.5' viewBox='0 0 24 24' width='20'>
+                    <path d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4'/>
+                    <polyline points='7 10 12 15 17 10'/>
+                    <line x1='12' x2='12' y1='15' y2='3'/>
+                  </svg>
+                  Fazer Download (MP4)
+                </a>
+                <p class='download-tip'>Dica: Se o vídeo abrir no navegador, toque no menu de 3 pontinhos e selecione "Fazer o download".</p>
+                <button class='btn-action btn-reset' id='btn-clear' type='button'>Baixar Outro</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- AdSense Meio -->
+      <div class='ad-slot' id='ad-middle'/>
+
+      <!-- Seção de Passos -->
+      <section class='steps-section' id='como-usar'>
+        <h2 class='section-title'>Como Baixar Reels do Instagram?</h2>
+        <div class='steps-grid'>
+          <div class='step-card'>
+            <div class='step-num'>1</div>
+            <h3 class='step-title'>Copie a URL</h3>
+            <p class='step-desc'>Abra o Instagram, vá até o Reels ou vídeo desejado, clique no botão de opções ou compartilhar e selecione "Copiar Link".</p>
+          </div>
+          <div class='step-card'>
+            <div class='step-num'>2</div>
+            <h3 class='step-title'>Cole o Link</h3>
+            <p class='step-desc'>Retorne para o nosso site, cole o link copiado na caixa de entrada localizada no topo da página e clique em "Obter Vídeo".</p>
+          </div>
+          <div class='step-card'>
+            <div class='step-num'>3</div>
+            <h3 class='step-title'>Baixe o Vídeo</h3>
+            <p class='step-desc'>Após alguns segundos de processamento, clique no botão verde "Fazer Download (MP4)" para salvar o vídeo no seu dispositivo.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Seção de Recursos -->
+      <section class='features-section'>
+        <div class='container'>
+          <h2 class='section-title'>Recursos do Downloader</h2>
+          <div class='features-grid'>
+            <div class='feature-card'>
+              <div class='feature-icon'>⚡</div>
+              <h3 class='feature-title'>Download Rápido</h3>
+              <p class='feature-desc'>Nosso motor extrai o link direto direto dos servidores CDN, garantindo a velocidade máxima do download.</p>
+            </div>
+            <div class='feature-card'>
+              <div class='feature-icon'>💎</div>
+              <h3 class='feature-title'>Qualidade HD</h3>
+              <p class='feature-desc'>Baixe os vídeos na resolução máxima original em que foram enviados, sem perda de qualidade visual.</p>
+            </div>
+            <div class='feature-card'>
+              <div class='feature-icon'>🔓</div>
+              <h3 class='feature-title'>Sem Cadastro</h3>
+              <p class='feature-desc'>Não exigimos nenhuma conta, e-mail ou dados de login do Instagram. Total privacidade e facilidade de uso.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Seção de FAQ (Acordeão) -->
+      <section class='faq-section' id='faq'>
+        <h2 class='section-title'>Perguntas Frequentes (FAQ)</h2>
+        <div class='faq-wrap'>
+          <div class='faq-item'>
+            <button class='faq-trigger' type='button'>Como baixar vídeos no celular (Android/iPhone)?</button>
+            <div class='faq-content'>
+              <div class='faq-content-inner'>
+                Basta copiar o link do Reels no app do Instagram, abrir o nosso site no navegador do celular (Chrome ou Safari), colar o link e clicar em download. No iPhone, o arquivo irá para a pasta "Downloads" do aplicativo Arquivos.
+              </div>
+            </div>
+          </div>
+          <div class='faq-item'>
+            <button class='faq-trigger' type='button'>A ferramenta é 100% gratuita?</button>
+            <div class='faq-content'>
+              <div class='faq-content-inner'>
+                Sim! A nossa ferramenta é totalmente grátis para qualquer pessoa utilizar. Nós mantemos os servidores ativos através de anúncios publicitários não invasivos.
+              </div>
+            </div>
+          </div>
+          <div class='faq-item'>
+            <button class='faq-trigger' type='button'>É preciso fazer login no Instagram?</button>
+            <div class='faq-content'>
+              <div class='faq-content-inner'>
+                Não, você não precisa informar sua senha ou login do Instagram. Nosso sistema acessa apenas dados públicos expostos de mídia.
+              </div>
+            </div>
+          </div>
+          <div class='faq-item'>
+            <button class='faq-trigger' type='button'>Posso baixar Reels de contas privadas?</button>
+            <div class='faq-content'>
+              <div class='faq-content-inner'>
+                Não, por razões de privacidade e restrições técnicas da plataforma do Instagram, não é possível fazer o download de Reels ou fotos que pertençam a contas privadas.
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    <b:else/>
+      <!-- ==========================================
+           VIEW: POST/PÁGINA INTERNA (SEO E LEITURA)
+           ========================================== -->
+      <div class='article-layout'>
+        <main class='seo-article'>
+          <!-- Seção obrigatória do Blogger para carregar a postagem -->
+          <b:section id='post-body-section' showaddelement='no'>
+            <b:widget id='Blog2' locked='true' title='Postagens do blog' type='Blog'>
+              <b:includable id='main'>
+                <b:loop values='data:posts' var='post'>
+                  <h1><data:post.title/></h1>
+                  <div class='post-body'>
+                    <data:post.body/>
+                  </div>
+                </b:loop>
+              </b:includable>
+            </b:widget>
+          </b:section>
+        </main>
+        
+        <!-- Barra Lateral com Mini-downloader -->
+        <aside class='sidebar'>
+          <div class='sidebar-widget glass-panel'>
+            <h3 class='sidebar-widget-title'>Baixar Reels Rápido</h3>
+            <p style='font-size: 0.85rem; color: var(--text-muted); margin-bottom: 15px;'>Precisa salvar um vídeo agora? Cole o link abaixo:</p>
+            
+            <div class='input-group' style='padding: 5px 5px 5px 12px; border-radius: 14px;'>
+              <input class='downloader-input' id='sidebar-instagram-url' placeholder='Link do Instagram...' style='font-size: 0.9rem;' type='text'/>
+              <button class='btn-download' id='btn-sidebar-submit' style='padding: 8px 14px; font-size: 0.85rem; border-radius: 10px;' type='button'>Baixar</button>
+            </div>
+            
+            <p style='font-size: 0.75rem; color: var(--text-muted); margin-top: 10px; text-align: center;'>Você será redirecionado para a home para concluir o download.</p>
+          </div>
+          
+          <!-- AdSense Lateral -->
+          <div class='ad-slot' id='ad-sidebar' style='min-height: 250px;'/>
+        </aside>
+      </div>
+    </b:if>
+    
+    <!-- AdSense Rodapé -->
+    <div class='ad-slot' id='ad-bottom'/>
+  </div>
+
+  <!-- Rodapé -->
+  <footer>
+    <div class='container'>
+      <div class='footer-links'>
+        <a href='/'>Início</a>
+        <a href='#'>Políticas de Privacidade</a>
+        <a href='#'>Termos de Serviço</a>
+        <a href='#'>Contato</a>
+      </div>
+      <p>&copy; 2026 InstaBaixar. Todos os direitos reservados. Não somos afiliados ao Instagram ou à Meta.</p>
+    </div>
+  </footer>
+
+  <!-- ==========================================
+       JAVASCRIPT LOGIC
+       ========================================== -->
+  <script>
+    // ═══════════════════════════════════════════════
+    // 1. CONFIGURAÇÕES DO SITE E ADSENSE
+    // ═══════════════════════════════════════════════
+    const CONFIG = {
+      // Cole a URL da API implantada na Vercel aqui (exemplo: 'https://jornalmetro-api.vercel.app')
+      apiUrl: 'https://api-nu-three-34.vercel.app', 
+      
+      // Configuração do Google AdSense
+      adsense: {
+        publisherId: 'ca-pub-XXXXXXXXXXXXXXX', // Cole seu ID de editor AdSense aqui
+        slots: {
+          top: 'XXXXXXXXXX',     // ID do bloco superior
+          result: 'XXXXXXXXXX',  // ID do bloco de resultado (Alto CTR)
+          middle: 'XXXXXXXXXX',  // ID do bloco do meio
+          sidebar: 'XXXXXXXXXX', // ID do bloco lateral (para posts)
+          bottom: 'XXXXXXXXXX'   // ID do bloco de rodapé
+        }
+      }
+    };
+
+    // ═══════════════════════════════════════════════
+    // 2. FUNÇÃO AUXILIAR PARA RENDERIZAR ADSENSE DINAMICAMENTE
+    // ═══════════════════════════════════════════════
+    function loadAd(elementId, slotId, format = 'auto') {
+      const container = document.getElementById(elementId);
+      if (!container || !slotId || slotId === 'XXXXXXXXXX' || CONFIG.adsense.publisherId === 'ca-pub-XXXXXXXXXXXXXXX') {
+        return; // Mantém o placeholder padrão caso não esteja configurado
+      }
+      
+      // Limpar placeholder
+      container.innerHTML = '';
+      
+      // Criar a tag ins
+      const insNode = document.createElement('ins');
+      insNode.className = 'adsbygoogle';
+      insNode.style.display = 'block';
+      insNode.setAttribute('data-ad-client', CONFIG.adsense.publisherId);
+      insNode.setAttribute('data-ad-slot', slotId);
+      insNode.setAttribute('data-ad-format', format);
+      insNode.setAttribute('data-full-width-responsive', 'true');
+      
+      container.appendChild(insNode);
+      
+      // Empurrar o anúncio
+      try {
+        (adsbygoogle = window.adsbygoogle || []).push({});
+      } catch (e) {
+        console.warn('Erro ao empurrar ad do AdSense:', e);
+      }
+    }
+
+    // Carregar os scripts do AdSense se configurado
+    function initializeAdsense() {
+      if (CONFIG.adsense.publisherId !== 'ca-pub-XXXXXXXXXXXXXXX') {
+        const adScript = document.createElement('script');
+        adScript.async = true;
+        adScript.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${CONFIG.adsense.publisherId}`;
+        adScript.crossOrigin = 'anonymous';
+        document.head.appendChild(adScript);
+
+        // Carregar blocos iniciais
+        loadAd('ad-top', CONFIG.adsense.slots.top);
+        loadAd('ad-middle', CONFIG.adsense.slots.middle);
+        loadAd('ad-sidebar', CONFIG.adsense.slots.sidebar);
+        loadAd('ad-bottom', CONFIG.adsense.slots.bottom);
+      }
+    }
+
+    // ═══════════════════════════════════════════════
+    // 3. EVENTOS DA INTERFACE (FAQ ACCORDION)
+    // ═══════════════════════════════════════════════
+    document.querySelectorAll('.faq-trigger').forEach(trigger => {
+      trigger.addEventListener('click', () => {
+        const parent = trigger.parentElement;
+        const content = trigger.nextElementSibling;
+        
+        const isActive = parent.classList.contains('active');
+        
+        // Fechar todos
+        document.querySelectorAll('.faq-item').forEach(item => {
+          item.classList.remove('active');
+          item.querySelector('.faq-content').style.maxHeight = null;
+        });
+        
+        if (!isActive) {
+          parent.classList.add('active');
+          content.style.maxHeight = content.scrollHeight + 'px';
+        }
+      });
+    });
+
+    // ═══════════════════════════════════════════════
+    // 4. LÓGICA DO DOWNLOADER (CORE)
+    // ═══════════════════════════════════════════════
+    const inputUrl = document.getElementById('instagram-url');
+    const btnSubmit = document.getElementById('btn-submit');
+    const btnPaste = document.getElementById('btn-paste');
+    const loader = document.getElementById('status-loader');
+    const alertBox = document.getElementById('error-alert');
+    const alertMsg = document.getElementById('error-msg');
+    const resultPanel = document.getElementById('result-panel');
+    const resultVideo = document.getElementById('result-video');
+    const downloadAnchor = document.getElementById('download-anchor');
+    const btnClear = document.getElementById('btn-clear');
+    
+    // Função para mostrar mensagem de erro
+    function showError(msg) {
+      alertMsg.textContent = msg;
+      alertBox.style.display = 'flex';
+      loader.style.display = 'none';
+      btnSubmit.disabled = false;
+    }
+
+    // Resetar painel e ferramenta
+    function resetForm() {
+      inputUrl.value = '';
+      alertBox.style.display = 'none';
+      resultPanel.style.display = 'none';
+      loader.style.display = 'none';
+      btnSubmit.disabled = false;
+      resultVideo.pause();
+      resultVideo.src = '';
+    }
+
+    // Processar link enviado
+    async function processDownload() {
+      const url = inputUrl.value.trim();
+      if (!url) {
+        showError('Por favor, cole um link válido do Instagram.');
+        return;
+      }
+
+      if (!url.includes('instagram.com')) {
+        showError('Por favor, insira um link do instagram.com válido.');
+        return;
+      }
+
+      // Preparar loading
+      alertBox.style.display = 'none';
+      resultPanel.style.display = 'none';
+      loader.style.display = 'flex';
+      btnSubmit.disabled = true;
+
+      try {
+        const response = await fetch(`${CONFIG.apiUrl}/api/download?url=${encodeURIComponent(url)}`);
+        const result = await response.json();
+
+        if (result.success && result.url) {
+          // Esconder loader
+          loader.style.display = 'none';
+          
+          // Preencher painel de resultados
+          resultVideo.src = result.url;
+          resultVideo.load();
+          downloadAnchor.href = result.url;
+          
+          // Ajustar badge do tipo
+          const badge = document.getElementById('result-badge');
+          if (result.type) {
+            badge.textContent = result.type;
+          }
+          
+          // Mostrar resultado
+          resultPanel.style.display = 'block';
+          
+          // Carregar AdSense específico do resultado (se houver pub configurado)
+          loadAd('ad-result', CONFIG.adsense.slots.result, 'rectangle');
+        } else {
+          showError(result.error || 'Não conseguimos extrair o vídeo deste link. Verifique se o post é de uma conta pública.');
+        }
+      } catch (err) {
+        console.error(err);
+        showError('Falha ao se conectar com os servidores de processamento. Tente novamente em alguns instantes.');
+      }
+    }
+
+    // Vincular botões da home
+    if (btnSubmit) {
+      btnSubmit.addEventListener('click', processDownload);
+      inputUrl.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') processDownload();
+      });
+      
+      btnPaste.addEventListener('click', async () => {
+        try {
+          const text = await navigator.clipboard.readText();
+          inputUrl.value = text;
+        } catch (err) {
+          alert('Por favor, cole o link pressionando Ctrl+V ou pressionando a caixa de texto.');
+        }
+      });
+
+      btnClear.addEventListener('click', resetForm);
+    }
+
+    // Vincular botão da barra lateral (Internal view redirection)
+    const btnSidebarSubmit = document.getElementById('btn-sidebar-submit');
+    const sidebarInput = document.getElementById('sidebar-instagram-url');
+    if (btnSidebarSubmit) {
+      btnSidebarSubmit.addEventListener('click', () => {
+        const url = sidebarInput.value.trim();
+        if (url) {
+          window.location.href = `/?url=${encodeURIComponent(url)}`;
+        }
+      });
+    }
+
+    // Tratar passagem de link via URL query param (ex: redirecionado da sidebar)
+    window.addEventListener('DOMContentLoaded', () => {
+      initializeAdsense();
+      
+      const params = new URLSearchParams(window.location.search);
+      const urlParam = params.get('url');
+      if (urlParam && inputUrl) {
+        inputUrl.value = urlParam;
+        processDownload();
+      }
+    });
+  </script>
+</body>
+</html>
