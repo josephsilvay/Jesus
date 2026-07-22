@@ -4,3 +4,23 @@ __pycache__/
 *.log
 *.zip
 *.mp3
+
+# Credentials & Tokens
+token.json
+client_secret.json
+
+# Debug Profiles & Sessions
+chrome_debug_profile/
+wp_session/
+debug_sessao.png
+playwright_debug.png
+playwright_debug_dom.html
+wp_editor_debug.html
+wp_editor_debug.png
+
+# Generated HTML & Temporary Files
+full.html
+meu_primeiro_post.html
+backup_post_gerado.html
+destaque.jpg
+pautas.csv

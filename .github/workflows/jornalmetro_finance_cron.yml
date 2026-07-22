@@ -1,0 +1,49 @@
+name: Jornal Metro — Finanças Pessoais Bot (2x ao dia)
+
+on:
+  schedule:
+    # Rodar às 11:00 UTC (08:00 BRT) e 20:00 UTC (17:00 BRT) — Máximo 2 postagens por dia
+    - cron: '0 11,20 * * *'
+  workflow_dispatch:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  run-metro-finance-bot:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repositório
+      uses: actions/checkout@v4
+
+    - name: Configurar Python 3.12
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+        cache: 'pip'
+
+    - name: Instalar dependências
+      run: pip install -r requirements.txt
+
+    - name: Reconstruir credenciais e ambiente
+      env:
+        ENV_FILE_CONTENT: ${{ secrets.ENV_FILE }}
+        CLIENT_SECRET_CONTENT: ${{ secrets.CLIENT_SECRET_JSON }}
+        TOKEN_CONTENT: ${{ secrets.TOKEN_JSON }}
+      run: |
+        printf '%s' "$ENV_FILE_CONTENT" > .env
+        printf '%s' "$CLIENT_SECRET_CONTENT" > client_secret.json
+        printf '%s' "$TOKEN_CONTENT" > token.json
+        python -c "import json; json.load(open('token.json')); print('token.json OK')"
+
+    - name: Executar Bot de Finanças do Jornal Metro
+      run: python metro_finance_bot.py
+
+    - name: Salvar histórico de postagens diárias no repositório
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        git add published_history.json || true
+        git commit -m "chore: atualizar histórico de postagens diárias [skip ci]" || true
+        git push || true
