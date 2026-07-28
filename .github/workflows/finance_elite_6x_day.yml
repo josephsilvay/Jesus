@@ -1,0 +1,88 @@
+name: Finance Elite Bot — 6 Posts por Dia
+
+# ─── Horários estratégicos em BRT (UTC-3) ─────────────────────────────────────
+# Post 1: 06:30 BRT → 09:30 UTC  (Pico matinal — trabalhadores)
+# Post 2: 09:00 BRT → 12:00 UTC  (Google Discover peak)
+# Post 3: 12:00 BRT → 15:00 UTC  (Almoço — mobile)
+# Post 4: 15:00 BRT → 18:00 UTC  (Tarde — buscas de investimento)
+# Post 5: 18:30 BRT → 21:30 UTC  (Pós-trabalho — maior volume)
+# Post 6: 21:00 BRT → 00:00 UTC  (Noturno — empréstimo e crédito)
+
+on:
+  schedule:
+    - cron: '30 9 * * *'   # Post 1 — 06:30 BRT
+    - cron: '0 12 * * *'   # Post 2 — 09:00 BRT
+    - cron: '0 15 * * *'   # Post 3 — 12:00 BRT
+    - cron: '0 18 * * *'   # Post 4 — 15:00 BRT
+    - cron: '30 21 * * *'  # Post 5 — 18:30 BRT
+    - cron: '0 0 * * *'    # Post 6 — 21:00 BRT
+  workflow_dispatch:        # Permite execução manual pelo painel do GitHub
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  finance-elite-post:
+    name: Publicar Post Financeiro de Elite
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      # ── 1. Checkout ──────────────────────────────────────────────────────────
+      - name: 📥 Checkout do repositório
+        uses: actions/checkout@v4
+
+      # ── 2. Python 3.12 ───────────────────────────────────────────────────────
+      - name: 🐍 Configurar Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      # ── 3. Dependências ──────────────────────────────────────────────────────
+      - name: 📦 Instalar dependências Python
+        run: pip install -r requirements.txt
+
+      # ── 4. Credenciais ───────────────────────────────────────────────────────
+      - name: 🔐 Reconstruir credenciais e ambiente
+        env:
+          ENV_FILE_CONTENT:     ${{ secrets.ENV_FILE }}
+          CLIENT_SECRET_CONTENT: ${{ secrets.CLIENT_SECRET_JSON }}
+          TOKEN_CONTENT:        ${{ secrets.TOKEN_JSON }}
+        run: |
+          printf '%s' "$ENV_FILE_CONTENT"      > .env
+          printf '%s' "$CLIENT_SECRET_CONTENT" > client_secret.json
+          printf '%s' "$TOKEN_CONTENT"         > token.json
+          python -c "
+          import json, sys
+          try:
+              data = json.load(open('token.json'))
+              print('✅ token.json válido — expira:', data.get('expiry', 'N/A'))
+          except Exception as e:
+              print(f'❌ token.json inválido: {e}')
+              sys.exit(1)
+          "
+
+      # ── 5. Restaura histórico de posts ───────────────────────────────────────
+      - name: 📂 Restaurar histórico de posts do cache
+        id: cache-history
+        uses: actions/cache@v4
+        with:
+          path: finance_elite_history.json
+          key: finance-elite-history-${{ github.run_id }}
+          restore-keys: |
+            finance-elite-history-
+
+      # ── 6. Executa o bot ──────────────────────────────────────────────────────
+      - name: 🚀 Executar Finance Elite Bot
+        run: python finance_elite_bot.py
+
+      # ── 7. Persiste histórico ────────────────────────────────────────────────
+      - name: 💾 Salvar histórico no repositório
+        if: always()
+        run: |
+          git config user.name  "Finance Elite Bot"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add finance_elite_history.json 2>/dev/null || true
+          git diff --staged --quiet || git commit -m "chore: atualizar histórico de posts [skip ci]"
+          git push || echo "⚠️ Push ignorado (sem mudanças)"
