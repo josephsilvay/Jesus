@@ -1,16 +1,16 @@
-name: Jornal Metro — Finanças Pessoais Bot (2x ao dia)
+name: Cupons Válidos — Bot de Cupons de Desconto (4x ao dia)
 
 on:
   # PAUSADO ATÉ SEGUNDA ORDEM
   # schedule:
-  #   - cron: '0 11,20 * * *'  # 08:00 e 17:00 BRT — Máximo 2 postagens por dia
+  #   - cron: '0 0,12,16,20 * * *'  # 09:00, 13:00, 17:00 e 21:00 BRT
   workflow_dispatch:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
-  run-metro-finance-bot:
+  run-cupons-bot:
     runs-on: ubuntu-latest
 
     steps:
@@ -37,13 +37,13 @@ jobs:
         printf '%s' "$TOKEN_CONTENT" > token.json
         python -c "import json; json.load(open('token.json')); print('token.json OK')"
 
-    - name: Executar Bot de Finanças do Jornal Metro
-      run: python metro_finance_bot.py
+    - name: Executar Bot de Cupons de Desconto
+      run: python blogger_bot_cupons.py
 
-    - name: Salvar histórico de postagens diárias no repositório
+    - name: Salvar histórico de ofertas no repositório
       run: |
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
-        git add published_history.json || true
-        git commit -m "chore: atualizar histórico de postagens diárias [skip ci]" || true
+        git add cupons_history.json || true
+        git commit -m "chore: atualizar histórico de cupons publicados [skip ci]" || true
         git push || true
