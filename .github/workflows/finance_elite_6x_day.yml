@@ -9,14 +9,14 @@ name: Finance Elite Bot — 6 Posts por Dia
 # Post 6: 21:00 BRT → 00:00 UTC  (Noturno — empréstimo e crédito)
 
 on:
-  schedule:
-    - cron: '30 9 * * *'   # Post 1 — 06:30 BRT
-    - cron: '0 12 * * *'   # Post 2 — 09:00 BRT
-    - cron: '0 15 * * *'   # Post 3 — 12:00 BRT
-    - cron: '0 18 * * *'   # Post 4 — 15:00 BRT
-    - cron: '30 21 * * *'  # Post 5 — 18:30 BRT
-    - cron: '0 0 * * *'    # Post 6 — 21:00 BRT
-  workflow_dispatch:        # Permite execução manual pelo painel do GitHub
+  # schedule:
+  #   - cron: '30 9 * * *'   # Post 1 — 06:30 BRT
+  #   - cron: '0 12 * * *'   # Post 2 — 09:00 BRT
+  #   - cron: '0 15 * * *'   # Post 3 — 12:00 BRT
+  #   - cron: '0 18 * * *'   # Post 4 — 15:00 BRT
+  #   - cron: '30 21 * * *'  # Post 5 — 18:30 BRT
+  #   - cron: '0 0 * * *'    # Post 6 — 21:00 BRT
+  # workflow_dispatch:      # DESATIVADO — bot pausado manualmente
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
