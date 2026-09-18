@@ -253,20 +253,20 @@ def find_youtube_video(topic):
             print(f"   ⚠️ YouTube API: {e}")
 
     fallback = {
-        "investimento":   ("6iGfYH7-M8I", "Como Começar a Investir do Zero",              "Me Poupe!"),
-        "tesouro direto": ("TmA-wMzPVbQ", "Tesouro Direto Explicado Passo a Passo",       "Primo Rico"),
-        "cartão":         ("sVY5b3_o-jU", "Melhores Cartões de Crédito 2025",             "Nath Finanças"),
-        "empréstimo":     ("CkKN0GWI0Ag", "Empréstimo Consignado: Tudo Que Você Precisa", "Me Poupe!"),
-        "fgts":           ("GtJ0E45Dq3M", "FGTS Saque Aniversário: Vale a Pena?",         "Primo Rico"),
-        "bolsa":          ("y9I2hcHLVuQ", "Como Investir na Bolsa de Valores",            "XP Investimentos"),
-        "dívida":         ("vl7SB6LvXAk", "Como Sair das Dívidas em 2025",               "Me Poupe!"),
-        "score":          ("U6c9GH2D3Sk", "Como Aumentar o Score do Serasa",             "Nath Finanças"),
-        "poupança":       ("8CWk-aeVAEk", "Poupança vs Tesouro: Qual Rende Mais?",        "Primo Invest"),
-        "renda extra":    ("aCqHSC14Xvk", "Como Fazer Renda Extra em 2025",              "Me Poupe!"),
-        "selic":          ("Lz3UWTGx2tA", "Selic Alta: Proteja e Renda Mais",            "InfoMoney"),
-        "inflação":       ("4k7G3SoHB0I", "Como a Inflação Afeta Seu Bolso",             "InfoMoney"),
-        "previdência":    ("sU8FeIHyZBA", "PGBL ou VGBL: Qual Previdência Escolher?",    "XP Investimentos"),
-        "fii":            ("J3lkB2gZX4A", "FIIs: Ganhe Renda Mensal com Fundos Imob.",   "Clube FII"),
+        "investimento": ("NMTmXh4855c", "TUDO O QUE VOCÊ PRECISA SABER ANTES DE COMEÇAR A INVESTIR", "Oficial"),
+        "tesouro direto": ("iQFmtW3zlmQ", "AULA COMPLETA SOBRE TESOURO DIRETO", "Oficial"),
+        "cartão": ("aqMQpCmju6k", "Serasa Limpa Nome: Melhor maneira de negociar dívidas em 2026", "Oficial"),
+        "empréstimo": ("G7YZyWMyrIw", "CONSEGUI NOVO EMPRÉSTIMO APÓS QUITAR COM DESCONTO", "Oficial"),
+        "fgts": ("RCNBMJluLCk", "Como Antecipar o FGTS pela Caixa? Passo a Passo", "Oficial"),
+        "bolsa": ("Acgd5fkXDmM", "3 INVESTIMENTOS PARA INICIANTES NA BOLSA DE VALORES", "Oficial"),
+        "dívida": ("aqMQpCmju6k", "Serasa Limpa Nome: Melhor maneira de negociar dívidas em 2026", "Oficial"),
+        "score": ("JNfBQB2ttKc", "Como aumentar meu Score? - Serasa Ensina", "Oficial"),
+        "poupança": ("0LcoP8furIE", "Cofrinho do Banco do Brasil vale a pena?", "Oficial"),
+        "renda extra": ("plNmfyws-GI", "10 dicas IMPORTANTES para seu PEQUENO NEGÓCIO ganhar DINHEIRO", "Oficial"),
+        "selic": ("WBNkhIaY7gc", "O que é a taxa Selic. E como ela funciona", "Oficial"),
+        "inflação": ("A4b7PyZ-DnA", "O que é inflação e como ela afeta o seu bolso?", "Oficial"),
+        "previdência": ("NSQbzN4JF-I", "Qual é o melhor: VGBL ou PGBL?", "Oficial"),
+        "fii": ("gOuYvRw5kE4", "COMO MONTAR UMA CARTEIRA DE FUNDOS IMOBILIÁRIOS", "Oficial"),
     }
     t_lower = topic.lower()
     for key, (vid_id, vtitle, channel) in fallback.items():
@@ -274,8 +274,8 @@ def find_youtube_video(topic):
             print(f"   ✅ Vídeo (fallback temático): {vtitle}")
             return _build_youtube_embed(vid_id, vtitle, channel)
 
-    return _build_youtube_embed("6iGfYH7-M8I",
-                                "Como Organizar Suas Finanças e Investir Melhor", "Me Poupe!")
+    return _build_youtube_embed("NMTmXh4855c",
+                                "Como Organizar Suas Finanças e Investir Melhor", "Oficial")
 
 
 def _build_youtube_embed(video_id, title, channel):
@@ -349,7 +349,7 @@ def get_pexels_image(keyword):
     print(f"🖼️ [4/6] Buscando imagem Pexels para '{keyword[:40]}'...")
     if not PEXELS_API_KEY:
         print("   ⚠️ PEXELS_API_KEY ausente.")
-        return ""
+        return "", ""
     try:
         clean_kw = keyword.split(",")[0].strip()
         url = (f"https://api.pexels.com/v1/search"
@@ -363,7 +363,7 @@ def get_pexels_image(keyword):
                 alt_text     = photo.get("alt", clean_kw)
                 photographer = photo.get("photographer", "Pexels")
                 pexels_url   = photo.get("url", "https://www.pexels.com")
-                return (
+                html = (
                     f'<div class="featured-image" style="text-align:center;margin:0 0 30px 0;">'
                     f'<img src="{img_url}" alt="{alt_text}" '
                     f'style="width:100%;max-width:900px;height:auto;border-radius:12px;'
@@ -373,9 +373,10 @@ def get_pexels_image(keyword):
                     f'{photographer}</a> / Pexels (uso editorial livre)</p>'
                     f'</div>\n'
                 )
+                return html, img_url
     except Exception as e:
         print(f"   ⚠️ Erro Pexels: {e}")
-    return ""
+    return "", ""
 
 
 # ── Geração do artigo ──────────────────────────────────────────────────────────
@@ -427,7 +428,9 @@ Você é um jornalista sênior especializado em economia, finanças pessoais e i
    PROIBIDO: "no cenário atual", "vale ressaltar", "em resumo", "por fim",
    "é importante destacar", "cabe salientar", "neste contexto", "de forma geral"
 3. CITAÇÕES DOS 2 ESPECIALISTAS: obrigatórias no padrão jornalístico brasileiro acima.
-4. ESTRUTURA HTML COMPLETA (nesta ordem):
+4. PROIBIDO MARKDOWN: Você NÃO PODE usar asteriscos para negrito (**texto**). Use EXCLUSIVAMENTE tags HTML (<strong>texto</strong>, <em>texto</em>).
+5. PARÁGRAFOS EM HTML: Todos os parágrafos de texto comum devem estar explicitamente envolvidos pelas tags <p> e </p>. NUNCA deixe texto solto.
+6. ESTRUTURA HTML COMPLETA (nesta ordem):
 
 [A] Caixa de Destaques (3 pontos-chave):
 <div style="background:#EBF5FB;border-left:5px solid #1A5276;padding:18px 22px;margin:0 0 28px;border-radius:8px;">
@@ -614,12 +617,33 @@ def _parse_llm_output(text):
         if not (t and ct):
             print("⚠️ Parseamento falhou: campos obrigatórios ausentes.")
             return None
+            
+        # Limpeza pesada de markdown caso o LLM ainda teime em usar
+        content_html = ct.group(1).strip()
+        # **texto** vira <strong>texto</strong>
+        content_html = re.sub(r'\*\*(.*?)\*\*', r'<strong>\1</strong>', content_html)
+        # *texto* vira <em>texto</em>
+        content_html = re.sub(r'\*(.*?)\*', r'<em>\1</em>', content_html)
+        
+        # --- NOVO: Força parágrafos em blocos de texto solto ---
+        blocks = content_html.split('\n\n')
+        formatted = []
+        for block in blocks:
+            block = block.strip()
+            if not block:
+                continue
+            if re.match(r'^<(div|p|h[1-6]|ul|ol|li|table|blockquote|script|style|a|img)', block, re.IGNORECASE):
+                formatted.append(block)
+            else:
+                formatted.append(f"<p>{block}</p>")
+        content_html = '\n\n'.join(formatted)
+        
         return {
             "title":            t.group(1).strip(),
             "meta_description": md.group(1).strip() if md else "",
             "keyword":          ki.group(1).strip() if ki else "finance money brazil",
             "labels":           lb.group(1).strip() if lb else "Finanças, Economia, Investimentos",
-            "content":          ct.group(1).strip(),
+            "content":          content_html,
         }
     except Exception as e:
         print(f"⚠️ Erro no parseamento: {e}")
@@ -689,9 +713,17 @@ def publish_to_blogger(service, article, full_html):
             labels.append(essential)
 
     try:
+        body_data = {
+            "title": article["title"],
+            "content": full_html,
+            "labels": labels[:10]
+        }
+        if "meta_description" in article and article["meta_description"]:
+            body_data["customMetaData"] = article["meta_description"][:150]
+
         res = service.posts().insert(
             blogId=BLOG_ID,
-            body={"title": article["title"], "content": full_html, "labels": labels[:10]},
+            body=body_data,
             isDraft=False
         ).execute()
         post_url = res.get("url", "")
@@ -720,8 +752,6 @@ def main():
     if not GEMINI_API_KEY and not GROQ_API_KEY:
         print("❌ ERRO CRÍTICO: Configure GEMINI_API_KEY ou GROQ_API_KEY no .env")
         raise SystemExit(1)
-    if not PEXELS_API_KEY:
-        print("⚠️ PEXELS_API_KEY ausente — posts sem imagem destacada.")
 
     if not check_daily_limit():
         print(f"🛑 Limite de {MAX_DAILY_POSTS} posts/dia atingido. Encerrando.")
@@ -730,14 +760,22 @@ def main():
     topic, context, news_url = get_finance_pauta()
     youtube_html             = find_youtube_video(topic)
     references               = get_expert_references(topic)
-    temp_image               = get_pexels_image(topic[:35])
+    temp_image_html, temp_img_url = get_pexels_image(topic[:35])
     article                  = generate_elite_article(topic, context, news_url, references)
 
     if not article:
         print("❌ Geração falhou. Execução encerrada sem publicação.")
         return
 
-    image_html = get_pexels_image(article.get("keyword", topic[:35])) or temp_image
+    image_html, img_url = get_pexels_image(article.get("keyword", topic[:35]))
+    if not image_html:
+        image_html, img_url = temp_image_html, temp_img_url
+
+    if img_url:
+        article["content"] = article["content"].replace("[PEXELS_IMAGE_URL]", img_url)
+    else:
+        article["content"] = article["content"].replace('"image": ["[PEXELS_IMAGE_URL]"],', '')
+
     full_html  = assemble_post(article, image_html, youtube_html)
     service    = get_blogger_service()
     post_url   = publish_to_blogger(service, article, full_html)
