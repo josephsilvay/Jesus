@@ -1,17 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Bot de Automação de Elite — www.jornalmetro.com.br
-Nicho: Finanças Pessoais (Cartões, Empréstimos, Benefícios Sociais, Cupons/Descontos)
-Frequência: Máximo 2 postagens por dia
-Qualidade: 1.200 a 1.800 palavras, E-E-A-T, SEO Avançado, Schema.org FAQ (JSON-LD)
+Bot Jornal Metro v3 - www.jornalmetro.com.br
+Qualidade: 2.000+ palavras, pautas equilibradas (evergreen+atual), anti-IA, titulo PT-BR, videos verificados
 """
 
 import os
 import re
 import json
-import time
 import random
+import unicodedata
 import urllib.parse
 from datetime import datetime, timezone, timedelta
 import requests
@@ -24,45 +22,93 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 
 load_dotenv()
 
-# ── Configurações Principais ──────────────────────────────────────────────────
-BLOG_ID = "3535680605318989698"  # Blog ID do Jornal Metro (ganhardinheiro.jornalmetro.com.br)
-BLOG_DOMAIN = "ganhardinheiro.jornalmetro.com.br"
-MAX_DAILY_POSTS = 2
+BLOG_ID      = "5307582001063172924"
+BLOG_DOMAIN  = "www.jornalmetro.com.br"
+MAX_DAILY    = 2
 HISTORY_FILE = "published_history.json"
-SCOPES = ["https://www.googleapis.com/auth/blogger"]
+SCOPES       = ["https://www.googleapis.com/auth/blogger"]
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+GROQ_API_KEY   = os.getenv("GROQ_API_KEY")
 PEXELS_API_KEY = os.getenv("PEXELS_API_KEY")
 
-# ── Queries de Alto CPC e Busca Orgânica no Brasil ────────────────────────────
+BRT = timezone(timedelta(hours=-3))
+
+# ── Palavras que nunca devem ser minusculizadas (proprios, siglas) ──────────
+PROPER_TOKENS = {
+    "Brasil", "INSS", "FGTS", "CPF", "CEF", "Caixa", "Serasa", "SPC",
+    "Nubank", "Itau", "Bradesco", "Santander", "BTG", "XP", "PIS", "Pasep",
+    "BPC", "LOAS", "Pix", "PIX", "SVR", "BCB", "STF", "Procon", "Febraban",
+    "Bolsa", "Familia", "Desenrola", "CNPJ", "RG", "CET", "IOF", "CDI",
+    "Selic", "IBGE", "IPCA", "FGV", "Boa Vista", "Open Finance",
+}
+
+# ── Queries RSS – equilibradas entre evergreen e atual ─────────────────────
 HIGH_CPC_QUERIES = [
-    "cartão+de+crédito+sem+anuidade+OR+limite+cartão+OR+Serasa+score",
-    "empréstimo+consignado+OR+FGTS+saque+aniversário+OR+crédito+pessoal",
-    "Bolsa+Família+calendário+OR+INSS+benefício+OR+Caixa+Tem+auxílio",
-    "Desenrola+Brasil+OR+renegociação+dívida+OR+limpar+nome+SPC+Serasa",
-    "cupom+de+desconto+OR+promoção+OR+desconto+oferta",
-    "PIS+Pasep+abono+salarial+OR+seguro+desemprego+OR+revisão+INSS",
+    "cartao+de+credito+aprovacao+OR+limite+OR+cashback+OR+score+Serasa",
+    "emprestimo+consignado+INSS+OR+FGTS+antecipacao+OR+credito+pessoal+juros",
+    "Bolsa+Familia+valor+OR+INSS+beneficio+revisao+OR+BPC+LOAS",
+    "Desenrola+Brasil+renegociacao+OR+limpar+nome+OR+negativado+divida",
+    "PIS+Pasep+abono+OR+seguro+desemprego+OR+FGTS+saldo",
+    "cartao+de+credito+negado+OR+score+baixo+OR+como+conseguir+credito",
+    "emprestimo+pessoal+online+OR+fintech+credito+OR+banco+digital+conta",
+    "INSS+aposentadoria+OR+revisao+beneficio+OR+consignado+taxa",
 ]
 
+# ── Fallback com pautas equilibradas: frias mas com angulo especifico ──────
 PAUTAS_FALLBACK = [
-    "Cartão de crédito sem anuidade com aprovação imediata para negativados em 2026",
-    "Como antecipar o Saque Aniversário do FGTS pelo Caixa Tem: passo a passo",
-    "Calendário e valor do Bolsa Família 2026: saiba como consultar pelo CPF",
-    "Como aumentar o Score do Serasa em até 300 pontos de forma rápida e segura",
-    "Empréstimo consignado INSS 2026: novas regras e menores taxas de juros",
-    "Como consultar valores esquecidos no Banco Central pelo SVR em 2026",
-    "Como renegociar dívidas com até 90% de desconto pelo Serasa Limpa Nome",
-    "Abono Salarial PIS/Pasep 2026: quem tem direito e tabela de saques",
-    "Melhores cartões de crédito com cashback e sem anuidade no Brasil em 2026",
-    "Passo a passo para solicitar o BPC/LOAS no INSS sem complicação",
+    "Bancos cortaram limite de cartao de credito: o que fazer se o seu foi reduzido",
+    "Consignado INSS: como comparar taxas entre bancos e achar a menor antes de assinar",
+    "Score Serasa caiu sem motivo? Veja as causas mais comuns e como reverter rapido",
+    "FGTS: quem tem direito ao saque aniversario e quanto perde quem migra agora",
+    "Cartao de credito negado mesmo com nome limpo: os 5 motivos que os bancos nao revelam",
+    "Bolsa Familia bloqueado: as razoes mais comuns e o passo a passo para desbloquear",
+    "Emprestimo pessoal vs consignado: quando vale a pena cada um, com simulacao",
+    "BPC LOAS 2026: novas regras de revisao e quem pode perder o beneficio",
+    "Como aumentar o limite do cartao de credito sem pedir: estrategias que funcionam",
+    "Negativado com cartao de credito: as opcoes reais de credito para quem esta no SPC",
+    "Saque aniversario FGTS: bancos oferecem antecipacao, mas o custo real assusta",
+    "Revisao da aposentadoria pelo INSS: quem tem direito e quanto pode receber a mais",
+    "Open Finance: como usar seus dados bancarios para conseguir credito mais barato",
+    "Cartao sem anuidade com cashback: os que realmente valem a pena em 2026",
+    "Abono salarial PIS/Pasep: trabalhadores perdem beneficio por erro cadastral",
 ]
 
+# Palavras-chave de qualidade para filtrar manchetes do RSS
+RSS_QUALITY_SIGNALS = [
+    r'\d+%', r'\d+ pontos', r'veja como', r'entenda', r'saiba', r'caiu',
+    r'subiu', r'bloqueado', r'negado', r'aprovado', r'mudou', r'nova regra',
+    r'passo a passo', r'compare', r'simulacao', r'quanto', r'quando',
+    r'qual', r'como conseguir', r'como fazer', r'como evitar', r'cuidado',
+]
 
-# ── Controle de Trava Diária (Máximo 2 Posts/Dia) ─────────────────────────────
+# ── Utilidades ──────────────────────────────────────────────────────────────
+
 def get_today_str():
-    brt = timezone(timedelta(hours=-3))
-    return datetime.now(brt).strftime("%Y-%m-%d")
+    return datetime.now(BRT).strftime("%Y-%m-%d")
+
+
+def normalize_title_pt(title: str) -> str:
+    """
+    Normaliza titulo para ortografia portuguesa:
+    - Apenas a primeira palavra e substantivos proprios em maiuscula
+    - Siglas, nomes de marcas e institucoes permanecem intactos
+    """
+    words = title.split()
+    result = []
+    for i, w in enumerate(words):
+        # Mantem a primeira palavra como esta (mas com apenas 1a letra maiscula)
+        clean = w.strip(".,;:!?\"'")
+        if i == 0:
+            result.append(w[0].upper() + w[1:].lower() if w else w)
+            continue
+        # Mantem tokens proprios/siglas
+        if clean in PROPER_TOKENS or clean.isupper() and len(clean) >= 2:
+            result.append(w)
+            continue
+        # Lowercase geral
+        result.append(w.lower())
+    return " ".join(result)
 
 
 def check_and_update_daily_limit(increment=False):
@@ -72,284 +118,424 @@ def check_and_update_daily_limit(increment=False):
         try:
             with open(HISTORY_FILE, "r", encoding="utf-8") as f:
                 data = json.load(f)
-        except Exception as e:
-            print(f"⚠️ Erro ao ler {HISTORY_FILE}: {e}")
-
-    current_count = data.get(today, 0)
-
+        except Exception:
+            pass
+    count = data.get(today, 0)
     if not increment:
-        print(f"📊 Status do dia ({today}): {current_count}/{MAX_DAILY_POSTS} posts efetuados.")
-        return current_count < MAX_DAILY_POSTS
-
-    data[today] = current_count + 1
-    try:
-        with open(HISTORY_FILE, "w", encoding="utf-8") as f:
-            json.dump(data, f, indent=2)
-        print(f"✅ Registro atualizado para o dia {today}: {data[today]}/{MAX_DAILY_POSTS} posts.")
-    except Exception as e:
-        print(f"⚠️ Erro ao salvar {HISTORY_FILE}: {e}")
+        print(f"Posts hoje: {count}/{MAX_DAILY}")
+        return count < MAX_DAILY
+    data[today] = count + 1
+    with open(HISTORY_FILE, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2)
+    print(f"Registro: {data[today]}/{MAX_DAILY} posts.")
     return True
 
 
-# ── Conexão com Blogger ───────────────────────────────────────────────────────
 def get_blogger_service():
     creds = None
     if os.path.exists("token.json"):
         try:
             creds = Credentials.from_authorized_user_file("token.json", SCOPES)
-        except Exception as e:
-            print(f"⚠️ Erro no token.json: {e}")
-
+        except Exception:
+            pass
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
-            with open("token.json", "w") as token:
-                token.write(creds.to_json())
+            with open("token.json", "w") as f:
+                f.write(creds.to_json())
         else:
-            if os.path.exists("client_secret.json"):
-                flow = InstalledAppFlow.from_client_secrets_file("client_secret.json", SCOPES)
-                creds = flow.run_local_server(port=0)
-                with open("token.json", "w") as token:
-                    token.write(creds.to_json())
-            else:
-                raise FileNotFoundError("Arquivo client_secret.json não encontrado.")
-
+            flow = InstalledAppFlow.from_client_secrets_file("client_secret.json", SCOPES)
+            creds = flow.run_local_server(port=0)
+            with open("token.json", "w") as f:
+                f.write(creds.to_json())
     return build("blogger", "v3", credentials=creds)
 
 
-# ── Busca de Pautas de Alto CPC ───────────────────────────────────────────────
-def get_trending_finance_topic():
-    print("🔎 [1/5] Buscando pautas de alto CPC e busca orgânica...")
-    query = random.choice(HIGH_CPC_QUERIES)
-    url = f"https://news.google.com/rss/search?q={query}&hl=pt-BR&gl=BR&ceid=BR:pt-419"
+def score_headline(title: str) -> int:
+    """Pontua manchete: prefere titulos com angulo especifico, dados, conflito."""
+    t = title.lower()
+    score = 0
+    for pattern in RSS_QUALITY_SIGNALS:
+        if re.search(pattern, t):
+            score += 1
+    # Penaliza titulos muito genericos (rankings simples)
+    if re.search(r'^(os|as) \d+ (melhores|piores)', t):
+        score -= 2
+    # Bonus para manchetes com tensao/conflito
+    for w in ['mas', 'apesar', 'embora', 'porém', 'risco', 'perigo', 'alerta', 'cuidado', 'fraude']:
+        if w in t:
+            score += 1
+    return score
 
-    try:
-        r = requests.get(
-            url,
-            timeout=8,
-            headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0.0.0"},
-        )
-        if r.status_code == 200:
+
+def get_trending_finance_topic():
+    print("[1/5] Buscando pauta...")
+    best_title, best_summary, best_url, best_score = None, "", "", -99
+
+    for query in random.sample(HIGH_CPC_QUERIES, k=3):
+        url = f"https://news.google.com/rss/search?q={query}&hl=pt-BR&gl=BR&ceid=BR:pt-419"
+        try:
+            r = requests.get(url, timeout=8,
+                headers={"User-Agent": "Mozilla/5.0 Chrome/120.0.0.0"})
+            if r.status_code != 200:
+                continue
             feed = feedparser.parse(r.content)
-            if feed.entries:
-                item = random.choice(feed.entries[:10])
-                print(f"  -> Pauta selecionada (Google News): {item.title}")
-                return item.title, item.get("summary", ""), item.get("link", "")
-    except Exception as e:
-        print(f"  ⚠️ RSS timeout/falha ({e}), usando fallback curado.")
+            for item in feed.entries[:8]:
+                s = score_headline(item.title)
+                if s > best_score:
+                    best_score = s
+                    best_title = item.title
+                    best_summary = item.get("summary", "")
+                    best_url = item.get("link", "")
+        except Exception:
+            continue
+
+    if best_title and best_score >= 0:
+        print(f"  -> Pauta RSS (score={best_score}): {best_title}")
+        return best_title, best_summary, best_url
 
     pauta = random.choice(PAUTAS_FALLBACK)
-    print(f"  -> Pauta selecionada (Fallback Curado): {pauta}")
+    print(f"  -> Pauta Fallback: {pauta}")
     return pauta, "", ""
 
 
-# ── Geração de Conteúdo (Groq Llama-3.3 70B com Fallback Gemini) ───────────────
-def generate_article_content(topic, context="", news_url=""):
-    print(f"✍️ [2/5] Gerando artigo completo E-E-A-T (1.200-1.800 palavras) sobre '{topic}'...")
+def verify_youtube_video(video_id):
+    try:
+        url = f"https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v={video_id}&format=json"
+        r = requests.get(url, timeout=8)
+        if r.status_code == 200:
+            d = r.json()
+            return d.get("title", ""), d.get("thumbnail_url", "")
+    except Exception:
+        pass
+    return None, None
 
-    link_instrucao = (
-        f"Insira 1 link externo apontando para a fonte oficial usando <a href='{news_url}' target='_blank' rel='noopener'>cobertura oficial de referência</a>."
-        if news_url
-        else "Insira 1 link externo relevante para um portal oficial (ex: gov.br, caixa.gov.br, bcb.gov.br ou serasa.com.br)."
+
+def get_youtube_embed_html(query):
+    print(f"  [VIDEO] Buscando: {query}")
+    for q in [query, " ".join(query.split()[:4])]:
+        try:
+            r = requests.get(
+                f"https://www.youtube.com/results?search_query={urllib.parse.quote(q)}&sp=CAI%3D",
+                timeout=10, headers={"User-Agent": "Mozilla/5.0 Chrome/120.0.0.0"})
+            if r.status_code != 200:
+                continue
+            ids = list(dict.fromkeys(re.findall(r'"videoId":"([a-zA-Z0-9_-]{11})"', r.text)))
+            for vid_id in ids[:6]:
+                title, _ = verify_youtube_video(vid_id)
+                if title:
+                    print(f"  [VIDEO] OK: '{title}' ({vid_id})")
+                    embed_url = f"https://www.youtube.com/embed/{vid_id}?rel=0&modestbranding=1"
+                    return (
+                        f'<div style="margin:36px 0;border-radius:14px;overflow:hidden;box-shadow:0 8px 28px rgba(0,0,0,0.15);">'
+                        f'<div class="vid-wrapper">'
+                        f'<iframe src="{embed_url}" title="{title}" frameborder="0" '
+                        f'allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" '
+                        f'allowfullscreen></iframe>'
+                        f'</div>'
+                        f'<div style="background:#1a1a2e;padding:10px 16px;">'
+                        f'<p style="color:#ddd;font-size:13px;margin:0;">&#128249; <strong style="color:#fff;">{title}</strong></p>'
+                        f'</div></div>\n'
+                    )
+        except Exception as e:
+            print(f"  [VIDEO] Erro: {e}")
+    print("  [VIDEO] Nenhum video verificado encontrado.")
+    return ""
+
+
+def get_pexels_images(keyword, count=1):
+    if not PEXELS_API_KEY:
+        return []
+    try:
+        kw = keyword.split(",")[0].strip()
+        r = requests.get(
+            f"https://api.pexels.com/v1/search?query={urllib.parse.quote(kw)}&per_page={count+2}&orientation=landscape",
+            headers={"Authorization": PEXELS_API_KEY}, timeout=10)
+        if r.status_code == 200:
+            return [
+                {"url": p["src"]["large2x"], "alt": p.get("alt", kw),
+                 "photographer": p.get("photographer", "Pexels"),
+                 "photo_url": p.get("url", "https://www.pexels.com")}
+                for p in r.json().get("photos", [])[:count]
+            ]
+    except Exception as e:
+        print(f"  Pexels erro: {e}")
+    return []
+
+
+def make_image_html(img, caption=""):
+    return (
+        f'<figure style="margin:36px 0;text-align:center;">'
+        f'<img src="{img["url"]}" alt="{img["alt"]}" loading="lazy" decoding="async" '
+        f'style="width:100%;height:auto;border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,0.12);"/>'
+        f'<figcaption style="font-size:12px;color:#999;margin-top:8px;font-style:italic;">'
+        f'{caption or img["alt"]} &mdash; Foto: '
+        f'<a href="{img["photo_url"]}" rel="noopener" target="_blank" style="color:#999;">{img["photographer"]}</a> / Pexels'
+        f'</figcaption></figure>\n'
     )
 
-    prompt = f"""
-INSTRUÇÃO CRÍTICA DE REDAÇÃO E-E-A-T (MÁXIMA QUALIDADE E RANKING GOOGLE SERP):
-Você é um especialista em finanças pessoais, economia popular e jornalismo de utilidade pública escrevendo para o portal Jornal Metro (jornalmetro.com.br).
 
-Sua missão é criar o artigo mais completo, explicativo e útil da web sobre o tema: "{topic}".
-Contexto: {context}
+def sanitize_content(html):
+    html = re.sub(r"\[?(CAIXA_DESTAQUE|CAIXA_LEIA_TAMBEM|INTRO)\]?", "", html, flags=re.IGNORECASE)
+    html = re.sub(r"\*\*(.*?)\*\*", r"<strong>\1</strong>", html)
+    html = re.sub(r"<p[^>]*>\\s*</p>", "", html, flags=re.IGNORECASE)
+    html = re.sub(r"<div[^>]*>\\s*</div>", "", html, flags=re.IGNORECASE)
+    
+    # Quebrar paragrafos muito longos
+    def split_p(m):
+        text = m.group(1)
+        # Se for muito longo (ex: > 350 chars), tenta quebrar no ponto final
+        if len(text) > 200 and ". " in text:
+            parts = text.split(". ")
+            mid = len(parts) // 2
+            p1 = ". ".join(parts[:mid]) + "."
+            p2 = ". ".join(parts[mid:])
+            return f"<p>{p1}</p>\n<p>{p2}</p>"
+        return m.group(0)
+    html = re.sub(r"<p>(.*?)</p>", split_p, html, flags=re.IGNORECASE|re.DOTALL)
+    
+    return html.strip()
 
-REQUISITOS OBRIGATÓRIOS:
-1. EXTENSÃO: Mínimo 1.200 a 1.800 palavras. Textos curtos ou superficiais NÃO são aceitos.
-2. TOM DE VOZ: Didático, profissional, acolhedor e altamente esclarecedor. Zero clichês de IA (PROIBIDO usar "no cenário atual", "vale ressaltar", "em resumo", "por fim", "é importante destacar").
-3. ESTRUTURA DO ARTIGO (EM HTML):
-   - Título chamativo com palavra-chave no início (máximo 65 caracteres)
-   - Caixa de Destaque Inicial (div estilizada) com os 3 Principais Pontos do Artigo.
-   - <h2>O Que É e Como Funciona</h2>
-   - <h2>Quem Tem Direito e Requisitos de Elegibilidade</h2> (use listas <ul><li> com detalhes completos)
-   - <h2>Passo a Passo Completo para Solicitar ou Consultar</h2> (use lista ordenada <ol><li> detalhada)
-   - <h2>Tabela Prática e Valores</h2> (use <table> estilizada com cabeçalho <thead>)
-   - <h2>Cuidados Importantes e Como Evitar Golpes</h2> (dicas de segurança cibernética e financeira)
-   - <h2>Fontes Oficiais e Links Recomendados</h2> ({link_instrucao})
-   - <h2>Perguntas Frequentes (FAQ)</h2> (Mínimo 4 perguntas em <h3> e respostas detalhadas em <p>)
 
-4. MARCAÇÃO SCHEMA.ORG (JSON-LD):
-   Ao final do conteúdo, inclua uma tag <script type="application/ld+json"> contendo o Schema FAQPage oficial do Google correspondente às 4 perguntas do FAQ do artigo.
+def generate_article_content(topic, context="", news_url=""):
+    hoje = datetime.now(BRT).strftime("%d/%m/%Y")
+    print(f"[2/5] Gerando artigo sobre '{topic}'...")
 
-5. FORMATO DA RESPOSTA:
-Retorne EXCLUSIVAMENTE no formato delimitado abaixo:
+    link_instrucao = (
+        f'<a href="{news_url}" target="_blank" rel="noopener">leia a cobertura completa aqui</a>.'
+        if news_url else
+        "Inclua links para portais oficiais: gov.br, caixa.gov.br, bcb.gov.br ou serasa.com.br."
+    )
 
-[TITULO]
-Título Chamativo e Otimizado para SEO (max 65 chars)
+    prompt = f"""Voce e Joseph Silva (joseph.silvay@gmail.com), especialista e jornalista de financas pessoais com 15 anos de experiencia, escrevendo para o Jornal Metro (jornalmetro.com.br). Data de hoje: {hoje}.
 
-[KEYWORD_IMAGEM]
-English search term for Pexels photo (ex: credit card, money loan, wallet)
+TEMA: "{topic}"
+CONTEXTO: {context}
 
-[CATEGORIAS]
-Finanças Pessoais, Cartões, Benefícios, Empréstimos
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+REGRAS DE ESCRITA (inegociaveis):
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-[CONTEUDO]
-<div class="metro-highlights" style="background:#f0f7ff;border-left:4px solid #0056b3;padding:15px;margin-bottom:20px;border-radius:4px;">
-<strong>📌 Destaques Principais:</strong>
-<ul>
-<li>...</li>
-<li>...</li>
-<li>...</li>
-</ul>
-</div>
-<p>Início do texto...</p>
-... todo o corpo do artigo em HTML ...
-<script type="application/ld+json">
-{{
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  "mainEntity": [...]
-}}
-</script>
+TITULO:
+- Apenas a PRIMEIRA PALAVRA e SUBSTANTIVOS PROPRIOS (nomes de bancos, orgaos, programas) com letra maiuscula. O resto das palavras deve ser minusculo.
+- Exemplo ERRADO: "Como Aumentar Seu Score de Credito em 2026"
+- Exemplo CERTO: "Como aumentar seu score de credito em 2026"
+- Deve ter entre 6 e 12 palavras, com angulo especifico (dado, conflito ou promessa pratica), para nao ficar muito curto.
+
+PARAGRAFOS:
+- Cada <p> tem NO MAXIMO 3 frases curtas e diretas.
+- Varie o comprimento das frases (misture curtas e medias).
+- Comece paragrafos de formas diferentes: nunca dois seguidos com "O ", "A ", "Em ".
+- PROIBIDO comecar frase com "Vale ressaltar", "E importante", "Em resumo", "Por fim", "Nesse sentido", "Sendo assim", "Dessa forma".
+
+TOM E VOZ:
+- Escreva como um jornalista humano que conhece o assunto de verdade.
+- Use exemplos concretos com valores em reais, prazos reais, nomes de bancos reais.
+- Mostre o lado humano: mencione situacoes reais que brasileiros enfrentam.
+- Use dados especificos (porcentagens, valores, prazos) — invente se necessario, mas sejam verossimeis.
+- Inclua um ponto de vista critico ou uma advertencia genuina.
+
+PROIBICOES:
+- PROIBIDO <iframe>, <video>, <embed> (inseridos automaticamente pelo sistema)
+- PROIBIDO style com width, max-width, min-width ou margin:auto
+- PROIBIDO qualquer marcador de lista comecando com ** (negrito de markdown)
+- PROIBIDO listas de itens genéricos sem explicacao — cada <li> deve ter pelo menos 2 frases
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ESTRUTURA DO ARTIGO (2.000+ palavras):
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[INTRO] — 3 paragrafos de abertura que prendem o leitor, sem revelar tudo de cara.
+
+[CAIXA_DESTAQUE] — div com background:#EBF5FB e border-left:5px solid #1A5276. Obrigatorio colocar um titulo <strong>Resumo da matéria</strong> dentro da caixa, seguido de uma lista <ul><li> com os 3 pontos mais importantes.
+
+[PLACEHOLDER_VIDEO_1] — escreva exatamente este texto no ponto onde o primeiro video deve aparecer.
+
+<h2>O que e isso e por que importa agora</h2>
+— 4 paragrafos detalhados com contexto, dados e exemplo pratico real.
+— 1 caixa de estatistica: <div style="background:#f8f9fa;border-left:4px solid #2563eb;padding:16px;border-radius:6px;margin:24px 0;"> com numero impactante em <strong style="font-size:22px;color:#2563eb;">NUMERO</strong>
+
+<h2>Como funciona na pratica</h2>
+— 4 paragrafos explicativos, didaticos, com exemplo de cenario real.
+— 1 caixa de dica: <div style="background:#EAFAF1;border-left:4px solid #27AE60;padding:16px;border-radius:6px;margin:24px 0;">
+
+[PLACEHOLDER_IMAGEM_EXTRA] — escreva exatamente este texto para a segunda imagem.
+
+<h2>Quem tem direito e o que exigem</h2>
+— Lista <ul> com pelo menos 6 <li> bem explicados (2 frases cada).
+
+<h2>Passo a passo completo</h2>
+— Lista <ol> com pelo menos 8 passos detalhados.
+
+<h2>Numeros, taxas e comparativo</h2>
+— Tabela <table> com <thead> e <tbody>, pelo menos 4 linhas, sem style inline nas celulas.
+
+<h2>A visao de especialistas (Mercado e Entidades)</h2>
+— Cite 2 falas de especialistas (economistas, advogados, etc.) usando <blockquote>.
+— É OBRIGATÓRIO DAR OS CRÉDITOS DO VEÍCULO ORIGINAL (ex: "Segundo o economista Fulano de Tal, em entrevista ao Valor Econômico..." ou "...afirmou ao InfoMoney").
+— Use seu conhecimento da base de dados para trazer citações clássicas ou conhecidas sobre o tema ou use o contexto fornecido.
+— 3 paragrafos de analise critica sobre o impacto na vida financeira do brasileiro.
+
+[PLACEHOLDER_VIDEO_2] — segundo video (opcional, so escreva se fizer sentido no artigo).
+
+<h2>Armadilhas e como nao cair nelas</h2>
+— Caixa vermelha: <div style="background:#FDEDEC;border-left:5px solid #C0392B;padding:16px;border-radius:6px;margin:24px 0;">
+— Lista com pelo menos 5 armadilhas/golpes reais, cada uma com explicacao.
+
+<h2>Fontes e onde buscar ajuda</h2>
+— {link_instrucao}
+— Lista com links reais para orgaos oficiais.
+
+<h2>Perguntas frequentes</h2>
+— MINIMO 5 perguntas em <h3> com respostas completas em <p> (2-3 frases reais, sem enrolacao).
+
+[CAIXA_LEIA_TAMBEM] — <div style="background:#F0F3F4;border-radius:12px;padding:22px 26px;margin-top:40px;"> com 4 links de artigos relacionados.
+
+Schema FAQPage completo em <script type="application/ld+json"> com as 5+ perguntas.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+FORMATO EXATO DA RESPOSTA:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+###TITULO###
+titulo aqui (primeira palavra maiuscula, resto minusculo exceto proprios)
+
+###KEYWORD###
+keyword ingles para foto 1 (ex: credit card, family allowance)
+
+###KEYWORD2###
+keyword ingles para foto 2 (diferente da primeira)
+
+###KEYWORD_VIDEO###
+termo em portugues para busca de video no YouTube (ex: cartao de credito aprovacao, consignado INSS 2026)
+
+###CATEGORIAS###
+Categoria1, Categoria2
+
+###CONTEUDO###
+<p>Frase de abertura impactante. Segunda frase. Terceira frase.</p>
+<p>Segundo paragrafo. Segunda frase. Terceira frase.</p>
+... artigo completo ...
 """
 
-    # 1. Tenta Groq (Llama-3.3-70b-versatile)
-    if GROQ_API_KEY:
-        print("   -> Solicitando geração via Groq (Llama-3.3-70B)...")
-        try:
-            r = requests.post(
-                "https://api.groq.com/openai/v1/chat/completions",
-                headers={"Authorization": f"Bearer {GROQ_API_KEY}", "Content-Type": "application/json"},
-                json={
-                    "model": "llama-3.3-70b-versatile",
-                    "messages": [{"role": "user", "content": prompt}],
-                    "temperature": 0.6,
-                    "max_tokens": 4096,
-                },
-                timeout=60,
-            )
-            if r.status_code == 200:
-                text = r.json()["choices"][0]["message"]["content"]
-                if "[TITULO]" in text and "[CONTEUDO]" in text:
-                    print("   ✅ Artigo gerado com sucesso via Groq!")
-                    return parse_llm_output(text)
-            else:
-                print(f"   ⚠️ Groq status {r.status_code}: {r.text[:150]}")
-        except Exception as e:
-            print(f"   ⚠️ Erro Groq: {e}")
-
-    # 2. Fallback: Gemini API
-    if GEMINI_API_KEY:
-        print("   -> Fallback: Solicitando geração via Gemini...")
-        for model in ["gemini-2.5-flash", "gemini-2.0-flash"]:
-            url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={GEMINI_API_KEY}"
-            try:
-                r = requests.post(
-                    url,
-                    headers={"Content-Type": "application/json"},
-                    json={"contents": [{"parts": [{"text": prompt}]}]},
-                    timeout=60,
-                )
-                if r.status_code == 200:
-                    text = (
-                        r.json()
-                        .get("candidates", [{}])[0]
-                        .get("content", {})
-                        .get("parts", [{}])[0]
-                        .get("text", "")
+    for attempt in range(2):
+        if GROQ_API_KEY:
+            for groq_model in ["llama-3.3-70b-versatile", "llama-3.1-8b-instant"]:
+                print(f"   -> Tentativa {attempt+1}: Groq ({groq_model})...")
+                try:
+                    r = requests.post(
+                        "https://api.groq.com/openai/v1/chat/completions",
+                        headers={"Authorization": f"Bearer {GROQ_API_KEY}", "Content-Type": "application/json"},
+                        json={"model": groq_model,
+                              "messages": [{"role": "user", "content": prompt}],
+                              "temperature": 0.7, "max_tokens": 8192},
+                        timeout=120,
                     )
-                    if text and "[TITULO]" in text and "[CONTEUDO]" in text:
-                        print(f"   ✅ Artigo gerado via Gemini ({model})!")
-                        return parse_llm_output(text)
-            except Exception as e:
-                print(f"   ⚠️ Erro Gemini ({model}): {e}")
+                    if r.status_code == 200:
+                        text = r.json()["choices"][0]["message"]["content"]
+                        if "###TITULO###" in text and "###CONTEUDO###" in text:
+                            print(f"   Gerado via Groq ({groq_model})!")
+                            return parse_llm_output(text)
+                        print(f"   Groq sem delimitadores (tentativa {attempt+1}).")
+                    else:
+                        print(f"   Groq status {r.status_code}")
+                except Exception as e:
+                    print(f"   Erro Groq: {e}")
 
+        if GEMINI_API_KEY:
+            for model in ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-flash-latest"]:
+                print(f"   -> Gemini ({model})...")
+                url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={GEMINI_API_KEY}"
+                try:
+                    r = requests.post(url,
+                        headers={"Content-Type": "application/json"},
+                        json={"contents": [{"parts": [{"text": prompt}]}]},
+                        timeout=120)
+                    if r.status_code == 200:
+                        text = (r.json().get("candidates", [{}])[0]
+                                .get("content", {}).get("parts", [{}])[0].get("text", ""))
+                        if text and "###TITULO###" in text and "###CONTEUDO###" in text:
+                            print(f"   Gerado via Gemini ({model})!")
+                            return parse_llm_output(text)
+                except Exception as e:
+                    print(f"   Erro Gemini: {e}")
     return None
 
 
 def parse_llm_output(text):
     try:
-        t_match = re.search(r"\[TITULO\]\s*(.*?)\s*\[KEYWORD_IMAGEM\]", text, re.DOTALL | re.IGNORECASE)
-        k_match = re.search(r"\[KEYWORD_IMAGEM\]\s*(.*?)\s*\[CATEGORIAS\]", text, re.DOTALL | re.IGNORECASE)
-        c_match = re.search(r"\[CATEGORIAS\]\s*(.*?)\s*\[CONTEUDO\]", text, re.DOTALL | re.IGNORECASE)
-        cont_match = re.search(r"\[CONTEUDO\]\s*(.*)", text, re.DOTALL | re.IGNORECASE)
+        t   = re.search(r"###TITULO###\s*(.*?)\s*###KEYWORD###",         text, re.DOTALL|re.IGNORECASE)
+        k   = re.search(r"###KEYWORD###\s*(.*?)\s*###KEYWORD2###",       text, re.DOTALL|re.IGNORECASE)
+        k2  = re.search(r"###KEYWORD2###\s*(.*?)\s*###KEYWORD_VIDEO###", text, re.DOTALL|re.IGNORECASE)
+        kv  = re.search(r"###KEYWORD_VIDEO###\s*(.*?)\s*###CATEGORIAS###", text, re.DOTALL|re.IGNORECASE)
+        c   = re.search(r"###CATEGORIAS###\s*(.*?)\s*###CONTEUDO###",    text, re.DOTALL|re.IGNORECASE)
+        cnt = re.search(r"###CONTEUDO###\s*(.*)",                        text, re.DOTALL|re.IGNORECASE)
 
+        raw_title = t.group(1).strip() if t else "Guia de financas pessoais"
         return {
-            "title": t_match.group(1).strip() if t_match else "Guia Completo de Finanças",
-            "keyword": k_match.group(1).strip() if k_match else "finance money",
-            "categories": c_match.group(1).strip() if c_match else "Finanças Pessoais",
-            "content": cont_match.group(1).strip() if cont_match else "",
+            "title":         normalize_title_pt(raw_title),
+            "keyword":       k.group(1).strip()  if k  else "finance brazil",
+            "keyword2":      k2.group(1).strip() if k2 else "money savings",
+            "keyword_video": kv.group(1).strip() if kv else "financas pessoais",
+            "categories":    c.group(1).strip()  if c  else "Financas Pessoais",
+            "content":       cnt.group(1).strip() if cnt else "",
         }
     except Exception as e:
-        print(f"⚠️ Erro no parseamento: {e}")
+        print(f"Erro no parse: {e}")
         return None
 
 
-# ── Imagem em Alta Definição via Pexels ───────────────────────────────────────
-def get_pexels_image_html(keyword):
-    print(f"🖼️ [3/5] Buscando imagem no Pexels para '{keyword}'...")
-    if not PEXELS_API_KEY:
-        return ""
-
-    try:
-        clean_kw = keyword.split(",")[0].strip()
-        url = f"https://api.pexels.com/v1/search?query={urllib.parse.quote(clean_kw)}&per_page=1&orientation=landscape"
-        r = requests.get(url, headers={"Authorization": PEXELS_API_KEY}, timeout=10)
-        if r.status_code == 200:
-            photos = r.json().get("photos", [])
-            if photos:
-                img_url = photos[0]["src"]["original"]
-                alt_text = photos[0].get("alt", clean_kw)
-                return (
-                    f'<div class="post-featured-image" style="text-align:center;margin-bottom:25px;">'
-                    f'<img src="{img_url}" alt="{alt_text}" style="max-width:100%;height:auto;border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,0.15);" loading="lazy" decoding="async"/>'
-                    f'<p style="font-size:12px;color:#666;margin-top:6px;">Foto: Pexels / Reprodução</p>'
-                    f"</div>\n"
-                )
-    except Exception as e:
-        print(f"⚠️ Erro ao obter imagem do Pexels: {e}")
-    return ""
-
-
-# ── Publicação e Execução Principal ───────────────────────────────────────────
 def main():
-    print("============================================================")
-    print("🚀 INICIANDO AUTOMAÇÃO DE FINANÇAS — JORNAL METRO")
-    print("============================================================")
+    print("=" * 60)
+    print("JORNAL METRO - AUTOMACAO v3")
+    print("=" * 60)
 
     if not check_and_update_daily_limit(increment=False):
-        print("🛑 LIMITE DIÁRIO ATINGIDO (2/2 posts hoje). Encerrando para manter máxima qualidade.")
+        print("Limite diario atingido.")
         return
 
     topic, context, news_url = get_trending_finance_topic()
-    article_data = generate_article_content(topic, context, news_url)
+    data = generate_article_content(topic, context, news_url)
 
-    if not article_data or not article_data.get("content"):
-        print("❌ Falha na geração do artigo. Execução abortada.")
+    if not data or not data.get("content"):
+        print("Falha na geracao. Abortando.")
         return
 
-    image_html = get_pexels_image_html(article_data["keyword"])
+    # Imagens
+    imgs1 = get_pexels_images(data["keyword"],  count=1)
+    imgs2 = get_pexels_images(data["keyword2"], count=1)
+    hero_html = make_image_html(imgs1[0]) if imgs1 else ""
+    img2_html = make_image_html(imgs2[0]) if imgs2 else ""
 
-    full_html = image_html + article_data["content"]
-    labels = [cat.strip() for cat in article_data["categories"].split(",") if cat.strip()]
+    # Videos verificados
+    print("[VIDEO] Buscando videos...")
+    vid1 = get_youtube_embed_html(data["keyword_video"])
+    vid2 = get_youtube_embed_html(data["keyword_video"] + " passo a passo")
 
-    print(f"📤 [4/5] Publicando no Blogger (ID: {BLOG_ID})...")
+    # Montar HTML final
+    content = data["content"]
+    content = re.sub(r'\[?PLACEHOLDER_VIDEO_1\]?', vid1 or "", content, flags=re.IGNORECASE)
+    content = re.sub(r'\[?PLACEHOLDER_VIDEO_2\]?', vid2 or "", content, flags=re.IGNORECASE)
+    content = re.sub(r'\[?PLACEHOLDER_IMAGEM_EXTRA\]?', img2_html or "", content, flags=re.IGNORECASE)
+    content = sanitize_content(content)
+    full_html = hero_html + content
+
+    labels = [x.strip() for x in data["categories"].split(",") if x.strip()]
+
+    print(f"[4/5] Publicando: '{data['title']}'")
     try:
-        service = get_blogger_service()
-        post_body = {
-            "title": article_data["title"],
-            "content": full_html,
-            "labels": labels,
-        }
-        res = service.posts().insert(blogId=BLOG_ID, body=post_body, isDraft=False).execute()
-
-        post_url = res.get("url", "")
-        print("============================================================")
-        print("🎉 [5/5] SUCESSO! Artigo de alta qualidade publicado com sucesso!")
-        print(f"📌 Título: {article_data['title']}")
-        print(f"🔗 Link: {post_url}")
-        print("============================================================")
-
+        svc = get_blogger_service()
+        res = svc.posts().insert(
+            blogId=BLOG_ID,
+            body={"title": data["title"], "content": full_html, "labels": labels},
+            isDraft=False,
+        ).execute()
+        print("=" * 60)
+        print(f"PUBLICADO: {res.get('url', '')}")
+        print("=" * 60)
         check_and_update_daily_limit(increment=True)
-
     except Exception as e:
-        print(f"❌ Erro durante a publicação no Blogger: {e}")
+        print(f"Erro ao publicar: {e}")
 
 
 if __name__ == "__main__":

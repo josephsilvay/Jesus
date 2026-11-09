@@ -34,7 +34,7 @@ PEXELS_API_KEY  = os.getenv("PEXELS_API_KEY")
 YOUTUBE_API_KEY = os.getenv("YOUTUBE_API_KEY", "")
 
 BLOG_ID         = "5307582001063172924"
-BLOG_DOMAIN     = "f5ul.com"
+BLOG_DOMAIN     = "jornalmetro.com.br"
 MAX_DAILY_POSTS = 6
 HISTORY_FILE    = "finance_elite_history.json"
 SCOPES          = ["https://www.googleapis.com/auth/blogger"]
@@ -561,7 +561,7 @@ def _call_gemini(prompt):
     """Chama Gemini com retry para 429/503/529 (erros transientes). Remove gemini-1.5 (deprecated)."""
     if not GEMINI_API_KEY:
         return None
-    for model in ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-2.0-flash-lite"]:
+    for model in ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-flash-latest"]:
         url = (f"https://generativelanguage.googleapis.com/v1beta/models/"
                f"{model}:generateContent?key={GEMINI_API_KEY}")
         payload = {"contents": [{"parts": [{"text": prompt}]}],

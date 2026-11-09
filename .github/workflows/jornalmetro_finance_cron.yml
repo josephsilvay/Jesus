@@ -1,9 +1,8 @@
 name: Jornal Metro — Finanças Pessoais Bot (2x ao dia)
 
 on:
-  # PAUSADO ATÉ SEGUNDA ORDEM
-  # schedule:
-  #   - cron: '0 11,20 * * *'  # 08:00 e 17:00 BRT — Máximo 2 postagens por dia
+  schedule:
+    - cron: '0 11,20 * * *'  # 08:00 e 17:00 BRT — Máximo 2 postagens por dia
   workflow_dispatch:
 
 env:
